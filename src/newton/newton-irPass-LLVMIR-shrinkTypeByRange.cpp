@@ -44,8 +44,7 @@
 
 using namespace llvm;
 
-extern "C"
-{
+extern "C" {
 
 enum varType {
 	INT1	= 1,
@@ -62,28 +61,28 @@ enum varType {
 varType
 getIntegerTypeEnum(double min, double max, bool signFlag)
 {
-    varType finalType;
-    if ((!signFlag && max < UINT8_MAX) || (signFlag && min > INT8_MIN && max < INT8_MAX))
-    {
-        finalType = INT8;
-    }
-    else if ((!signFlag && max < UINT16_MAX) || (signFlag && min > INT16_MIN && max < INT16_MAX))
-    {
-        finalType = INT16;
-    }
-    else if ((!signFlag && max < UINT32_MAX) || (signFlag && min > INT32_MIN && max < INT32_MAX))
-    {
-        finalType = INT32;
-    }
-    else if ((!signFlag && max < UINT64_MAX) || (signFlag && min > INT64_MIN && max < INT64_MAX))
-    {
-        finalType = INT64;
-    }
-    else
-    {
-        finalType = UNKNOWN;
-    }
-    return finalType;
+	varType finalType;
+	if ((!signFlag && max < UINT8_MAX) || (signFlag && min > INT8_MIN && max < INT8_MAX))
+	{
+		finalType = INT8;
+	}
+	else if ((!signFlag && max < UINT16_MAX) || (signFlag && min > INT16_MIN && max < INT16_MAX))
+	{
+		finalType = INT16;
+	}
+	else if ((!signFlag && max < UINT32_MAX) || (signFlag && min > INT32_MIN && max < INT32_MAX))
+	{
+		finalType = INT32;
+	}
+	else if ((!signFlag && max < UINT64_MAX) || (signFlag && min > INT64_MIN && max < INT64_MAX))
+	{
+		finalType = INT64;
+	}
+	else
+	{
+		finalType = UNKNOWN;
+	}
+	return finalType;
 }
 #else
 /*
@@ -122,13 +121,13 @@ varType
 getFloatingTypeEnum(double min, double max)
 {
 	varType finalType;
-    if ((FLT_EPSILON < std::abs(min) && std::abs(min) < FLT_MAX) &&
-        (FLT_EPSILON < std::abs(max) && std::abs(max) < FLT_MAX))
+	if ((FLT_EPSILON < std::abs(min) && std::abs(min) < FLT_MAX) &&
+	    (FLT_EPSILON < std::abs(max) && std::abs(max) < FLT_MAX))
 	{
 		finalType = FLOAT;
 	}
-    else if ((DBL_EPSILON < std::abs(min) && std::abs(min) < DBL_MAX) &&
-             (DBL_EPSILON < std::abs(max) && std::abs(max) < DBL_MAX))
+	else if ((DBL_EPSILON < std::abs(min) && std::abs(min) < DBL_MAX) &&
+		 (DBL_EPSILON < std::abs(max) && std::abs(max) < DBL_MAX))
 	{
 		finalType = DOUBLE;
 	}
@@ -282,7 +281,7 @@ getTypeInfo(State * N, Value * inValue,
 		case Type::FloatTyID:
 			break;
 		case Type::DoubleTyID:
-//			typeInformation = getShrinkDoubleType(N, inValue, vrRangeIt->second);
+			//			typeInformation = getShrinkDoubleType(N, inValue, vrRangeIt->second);
 			break;
 		default:
 			break;
@@ -324,11 +323,14 @@ getRawType(Type * inputType, std::vector<Value *> indexValue = std::vector<Value
 			/*
 			 * need further check: this might should be removed.
 			 * */
-            if (0 != stType->getNumContainedTypes()) {
-                eleType = stType->getContainedType(0);
-            } else {
-                return stType;
-            }
+			if (0 != stType->getNumContainedTypes())
+			{
+				eleType = stType->getContainedType(0);
+			}
+			else
+			{
+				return stType;
+			}
 		}
 		else
 		{
@@ -470,10 +472,10 @@ rollbackType(State * N, Instruction * inInstruction, unsigned operandIdx, BasicB
 			{
 				newValue = Builder.CreateFPCast(valueInst, instPrevTypeInfo.valueType);
 			}
-            else
-            {
-                newValue = Builder.CreateBitCast(valueInst, instPrevTypeInfo.valueType);
-            }
+			else
+			{
+				newValue = Builder.CreateBitCast(valueInst, instPrevTypeInfo.valueType);
+			}
 			inInstruction->setOperand(operandIdx, newValue);
 			typeChangedInst.emplace(newValue, instPrevTypeInfo);
 		}
@@ -489,10 +491,10 @@ rollbackType(State * N, Instruction * inInstruction, unsigned operandIdx, BasicB
 			{
 				newValue = Builder.CreateFPCast(valueInst, instPrevTypeInfo.valueType);
 			}
-            else
-            {
-                newValue = Builder.CreateBitCast(valueInst, instPrevTypeInfo.valueType);
-            }
+			else
+			{
+				newValue = Builder.CreateBitCast(valueInst, instPrevTypeInfo.valueType);
+			}
 			inInstruction->replaceUsesOfWith(valueInst, newValue);
 			typeChangedInst.emplace(newValue, instPrevTypeInfo);
 		}
@@ -568,7 +570,7 @@ rollbackType(State * N, Instruction * inInstruction, unsigned operandIdx, BasicB
 bool
 isSignedValue(Value * inValue)
 {
-    // todo: get the sign bit from type system
+	// todo: get the sign bit from type system
 	bool signFlag = true;
 	if (Instruction * valueInst = llvm::dyn_cast<llvm::Instruction>(inValue))
 	{
@@ -781,11 +783,12 @@ matchOperandType(State * N, Instruction * inInstruction, BasicBlock & llvmIrBasi
 		Value * nonConstOperand = inInstruction->getOperand(nonConstOperandIdx);
 		auto	constType	= constOperand->getType();
 		auto	nonConstType	= nonConstOperand->getType();
-        bool nonConstSign = true;
-        auto tcIt = typeChangedInst.find(nonConstOperand);
-        if (tcIt != typeChangedInst.end()) {
-            nonConstSign = tcIt->second.signFlag;
-        }
+		bool	nonConstSign	= true;
+		auto	tcIt		= typeChangedInst.find(nonConstOperand);
+		if (tcIt != typeChangedInst.end())
+		{
+			nonConstSign = tcIt->second.signFlag;
+		}
 		if (!isa<llvm::ConstantData>(constOperand))
 		{
 			/*
@@ -891,7 +894,7 @@ matchOperandType(State * N, Instruction * inInstruction, BasicBlock & llvmIrBasi
 			{
 				typeInfo backType;
 				backType.valueType = constType;
-				backType.signFlag = nonConstSign;
+				backType.signFlag  = nonConstSign;
 				if (isa<StoreInst>(inInstruction))
 				{
 					backType.valueType = changeStoreInstSiblingType(backType.valueType, nonConstType);
@@ -955,12 +958,13 @@ matchDestType(State * N, Instruction * inInstruction, BasicBlock & llvmIrBasicBl
 	{
 		unsigned ptAddressSpace = srcType->getPointerAddressSpace();
 		srcType			= srcType->getPointerElementType();
-        if (srcType->isAggregateType()) {
-            /*
-             * we don't shrink the aggregate type
-             * */
-            return;
-        }
+		if (srcType->isAggregateType())
+		{
+			/*
+			 * we don't shrink the aggregate type
+			 * */
+			return;
+		}
 		std::vector<Value *> indexValue;
 		for (size_t idx = 0; idx < inInstruction->getNumOperands() - 1; idx++)
 		{
@@ -985,11 +989,11 @@ matchDestType(State * N, Instruction * inInstruction, BasicBlock & llvmIrBasicBl
 			typeInfo backType;
 			backType.signFlag  = isSignedValue(inInstruction);
 			backType.valueType = inInstType;
-            if (isa<LoadInst>(inInstruction))
-            {
-                unsigned ptAddressSpace = srcType->getPointerAddressSpace();
-                backType.valueType	= backType.valueType->getPointerTo(ptAddressSpace);
-            }
+			if (isa<LoadInst>(inInstruction))
+			{
+				unsigned ptAddressSpace = srcType->getPointerAddressSpace();
+				backType.valueType	= backType.valueType->getPointerTo(ptAddressSpace);
+			}
 			for (size_t id = 0; id < inInstruction->getNumOperands(); id++)
 			{
 				auto newTypeValue = rollbackType(N, inInstruction, id, llvmIrBasicBlock, typeChangedInst, backType);
@@ -1039,13 +1043,13 @@ matchDestType(State * N, Instruction * inInstruction, BasicBlock & llvmIrBasicBl
 		/*
 		 * roll back operands to typeInformation.valueType
 		 * */
-        if (isa<LoadInst>(inInstruction))
-        {
-            unsigned ptAddressSpace	  = srcType->getPointerAddressSpace();
-            typeInformation.valueType = typeInformation.valueType->getPointerTo(ptAddressSpace);
-        }
-        size_t roll_backed_op_num = isa<GetElementPtrInst>(inInstruction) ? 1 : inInstruction->getNumOperands();
-        for (size_t id = 0; id < roll_backed_op_num; id++)
+		if (isa<LoadInst>(inInstruction))
+		{
+			unsigned ptAddressSpace	  = srcType->getPointerAddressSpace();
+			typeInformation.valueType = typeInformation.valueType->getPointerTo(ptAddressSpace);
+		}
+		size_t roll_backed_op_num = isa<GetElementPtrInst>(inInstruction) ? 1 : inInstruction->getNumOperands();
+		for (size_t id = 0; id < roll_backed_op_num; id++)
 		{
 			typeInfo operandPrevTypeInfo{typeInformation.valueType,
 						     isSignedValue(inInstruction->getOperand(id))};
@@ -1115,7 +1119,7 @@ shrinkInstructionType(State * N, Instruction * inInstruction, BasicBlock & llvmI
 		typeInformation.valueType = typeInformation.valueType->getPointerElementType();
 	}
 
-	changed			= true;
+	changed			 = true;
 	auto	      inInstType = inInstruction->getType();
 	IRBuilder<>   Builder(&llvmIrBasicBlock);
 	Instruction * insertPoint = inInstruction->getNextNode();
@@ -1142,10 +1146,10 @@ shrinkInstructionType(State * N, Instruction * inInstruction, BasicBlock & llvmI
 	{
 		castInst = Builder.CreateFPCast(cloneInst, typeInformation.valueType);
 	}
-    else
-    {
-        castInst = Builder.CreateBitCast(cloneInst, typeInformation.valueType);
-    }
+	else
+	{
+		castInst = Builder.CreateBitCast(cloneInst, typeInformation.valueType);
+	}
 	auto vrIt = virtualRegisterRange.find(inInstruction);
 	if (castInst != nullptr && vrIt != virtualRegisterRange.end())
 	{
@@ -1276,66 +1280,82 @@ rollBackDependencyLink(State * N, const std::vector<Value *> & depLink,
  *  %srcInst = op bigType %a, %b
  *  %inst = trunc bigType %srcInst to smallType
  * */
-bool matchCastType(State * N, Instruction * inInstruction, BasicBlock & llvmIrBasicBlock,
-                    std::map<llvm::Value *, std::pair<double, double>> & virtualRegisterRange,
-                    std::map<Value *, typeInfo> & typeChangedInst) {
-    bool	 changed	 = false;
+bool
+matchCastType(State * N, Instruction * inInstruction, BasicBlock & llvmIrBasicBlock,
+	      std::map<llvm::Value *, std::pair<double, double>> & virtualRegisterRange,
+	      std::map<Value *, typeInfo> &			   typeChangedInst)
+{
+	bool changed = false;
 
-    auto inInstType = inInstruction->getType();
-    auto srcInst = inInstruction->getOperand(0);
-    auto srcType = srcInst->getType();
+	auto inInstType = inInstruction->getType();
+	auto srcInst	= inInstruction->getOperand(0);
+	auto srcType	= srcInst->getType();
 
-    // todo: get the sign bit from type system
-    bool signFlag = true;
-    auto tcIt = typeChangedInst.find(inInstruction);
-    if (tcIt != typeChangedInst.end()) {
-        signFlag = tcIt->second.signFlag;
-    }
+	// todo: get the sign bit from type system
+	bool signFlag = true;
+	auto tcIt     = typeChangedInst.find(inInstruction);
+	if (tcIt != typeChangedInst.end())
+	{
+		signFlag = tcIt->second.signFlag;
+	}
 
-    Value * castInst;
-    IRBuilder<>   Builder(&llvmIrBasicBlock);
-    Builder.SetInsertPoint(inInstruction->getNextNode());
+	Value *	    castInst;
+	IRBuilder<> Builder(&llvmIrBasicBlock);
+	Builder.SetInsertPoint(inInstruction->getNextNode());
 
-    if (compareType(inInstType, srcType) > 0) {
-        if (inInstruction->getOpcode() == Instruction::Trunc) {
-            castInst = Builder.CreateIntCast(srcInst, inInstType, signFlag);
-            changed = true;
-        } else if (inInstruction->getOpcode() == Instruction::FPTrunc) {
-            castInst = Builder.CreateFPCast(srcInst, inInstType);
-            changed = true;
-        }
-    } else if (compareType(inInstType, srcType) > 0) {
-        if (inInstruction->getOpcode() == Instruction::ZExt ||
-            inInstruction->getOpcode() == Instruction::SExt) {
-            castInst = Builder.CreateIntCast(srcInst, inInstType, signFlag);
-            changed = true;
-        } else if (inInstruction->getOpcode() == Instruction::FPExt) {
-            castInst = Builder.CreateFPCast(srcInst, inInstType);
-            changed = true;
-        }
-    } else {
-        /* mergeCast will do this */
-    }
+	if (compareType(inInstType, srcType) > 0)
+	{
+		if (inInstruction->getOpcode() == Instruction::Trunc)
+		{
+			castInst = Builder.CreateIntCast(srcInst, inInstType, signFlag);
+			changed	 = true;
+		}
+		else if (inInstruction->getOpcode() == Instruction::FPTrunc)
+		{
+			castInst = Builder.CreateFPCast(srcInst, inInstType);
+			changed	 = true;
+		}
+	}
+	else if (compareType(inInstType, srcType) > 0)
+	{
+		if (inInstruction->getOpcode() == Instruction::ZExt ||
+		    inInstruction->getOpcode() == Instruction::SExt)
+		{
+			castInst = Builder.CreateIntCast(srcInst, inInstType, signFlag);
+			changed	 = true;
+		}
+		else if (inInstruction->getOpcode() == Instruction::FPExt)
+		{
+			castInst = Builder.CreateFPCast(srcInst, inInstType);
+			changed	 = true;
+		}
+	}
+	else
+	{
+		/* mergeCast will do this */
+	}
 
-    if (!changed) {
-        return changed;
-    }
+	if (!changed)
+	{
+		return changed;
+	}
 
-    auto vrIt = virtualRegisterRange.find(inInstruction);
-    if (castInst != nullptr && vrIt != virtualRegisterRange.end())
-    {
-        virtualRegisterRange.emplace(castInst, vrIt->second);
-    }
+	auto vrIt = virtualRegisterRange.find(inInstruction);
+	if (castInst != nullptr && vrIt != virtualRegisterRange.end())
+	{
+		virtualRegisterRange.emplace(castInst, vrIt->second);
+	}
 
-    if (tcIt != typeChangedInst.end()) {
-        typeChangedInst.emplace(castInst, tcIt->second);
-    }
+	if (tcIt != typeChangedInst.end())
+	{
+		typeChangedInst.emplace(castInst, tcIt->second);
+	}
 
-    Instruction * newCastInst = llvm::dyn_cast<llvm::Instruction>(castInst);
-    inInstruction->replaceAllUsesWith(newCastInst);
-    inInstruction->removeFromParent();
+	Instruction * newCastInst = llvm::dyn_cast<llvm::Instruction>(castInst);
+	inInstruction->replaceAllUsesWith(newCastInst);
+	inInstruction->eraseFromParent();
 
-    return changed;
+	return changed;
 }
 
 /*
@@ -1386,10 +1406,10 @@ shrinkInstType(State * N, BoundInfo * boundInfo, Function & llvmIrFunction)
 			{
 				castValue = Builder.CreateFPCast(paramOp, typeInformation.valueType);
 			}
-            else
-            {
-                castValue = Builder.CreateBitCast(paramOp, typeInformation.valueType);
-            }
+			else
+			{
+				castValue = Builder.CreateBitCast(paramOp, typeInformation.valueType);
+			}
 			auto vrIt = boundInfo->virtualRegisterRange.find(paramOp);
 			if (castValue != nullptr && vrIt != boundInfo->virtualRegisterRange.end())
 			{
@@ -1503,31 +1523,31 @@ shrinkInstType(State * N, BoundInfo * boundInfo, Function & llvmIrFunction)
 							      boundInfo->virtualRegisterRange,
 							      typeChangedInst);
 					break;
-                case Instruction::FPToUI:
-                case Instruction::FPToSI:
-                case Instruction::SIToFP:
-                case Instruction::UIToFP:
-                case Instruction::ZExt:
-                case Instruction::SExt:
-                case Instruction::FPExt:
-                case Instruction::Trunc:
-                case Instruction::FPTrunc:
-                case Instruction::BitCast:
-                    matchCastType(N, llvmIrInstruction, llvmIrBasicBlock,
-                                   boundInfo->virtualRegisterRange,
-                                   typeChangedInst);
-                    /*
-                     * update the llvmIrInstruction,
-                     * maybe there's a better way
-                     *
-                     * question: why `--` get the next instruction?
-                     * */
-                    llvmIrInstruction = &*itBB--;
-                    llvmIrInstruction = &*itBB++;
-                    shrinkInstructionType(N, llvmIrInstruction, llvmIrBasicBlock,
-                                          boundInfo->virtualRegisterRange,
-                                          typeChangedInst);
-                    break;
+				case Instruction::FPToUI:
+				case Instruction::FPToSI:
+				case Instruction::SIToFP:
+				case Instruction::UIToFP:
+				case Instruction::ZExt:
+				case Instruction::SExt:
+				case Instruction::FPExt:
+				case Instruction::Trunc:
+				case Instruction::FPTrunc:
+				case Instruction::BitCast:
+					matchCastType(N, llvmIrInstruction, llvmIrBasicBlock,
+						      boundInfo->virtualRegisterRange,
+						      typeChangedInst);
+					/*
+					 * update the llvmIrInstruction,
+					 * maybe there's a better way
+					 *
+					 * question: why `--` get the next instruction?
+					 * */
+					llvmIrInstruction = &*itBB--;
+					llvmIrInstruction = &*itBB++;
+					shrinkInstructionType(N, llvmIrInstruction, llvmIrBasicBlock,
+							      boundInfo->virtualRegisterRange,
+							      typeChangedInst);
+					break;
 				/*
 				 * the return type of storeInst is always void
 				 * the return type of cmpInst is always i1
@@ -1566,17 +1586,17 @@ shrinkInstType(State * N, BoundInfo * boundInfo, Function & llvmIrFunction)
 							assert(retValue != nullptr && "return void");
 							if (funcRetType->isIntegerTy())
 							{
-                                // todo: get the sign bit from type system
+								// todo: get the sign bit from type system
 								castInst = Builder.CreateIntCast(retValue, funcRetType, true);
 							}
 							else if (funcRetType->isDoubleTy())
 							{
 								castInst = Builder.CreateFPCast(retValue, funcRetType);
 							}
-                            else
-                            {
-                                castInst = Builder.CreateBitCast(retValue, funcRetType);
-                            }
+							else
+							{
+								castInst = Builder.CreateBitCast(retValue, funcRetType);
+							}
 							auto vrIt = boundInfo->virtualRegisterRange.find(retValue);
 							if (castInst != nullptr && vrIt != boundInfo->virtualRegisterRange.end())
 							{
@@ -1585,7 +1605,7 @@ shrinkInstType(State * N, BoundInfo * boundInfo, Function & llvmIrFunction)
 							ReturnInst::Create(llvmIrReturnInstruction->getContext(),
 									   castInst,
 									   llvmIrReturnInstruction->getParent());
-							llvmIrReturnInstruction->removeFromParent();
+							llvmIrReturnInstruction->eraseFromParent();
 						}
 					}
 					break;
@@ -1676,10 +1696,10 @@ mergeCast(State * N, Function & llvmIrFunction,
 			Instruction * llvmIrInstruction = &*itBB++;
 			switch (llvmIrInstruction->getOpcode())
 			{
-                case Instruction::FPToUI:
-                case Instruction::FPToSI:
-                case Instruction::SIToFP:
-                case Instruction::UIToFP:
+				case Instruction::FPToUI:
+				case Instruction::FPToSI:
+				case Instruction::SIToFP:
+				case Instruction::UIToFP:
 				case Instruction::ZExt:
 				case Instruction::SExt:
 				case Instruction::FPExt:
@@ -1696,7 +1716,7 @@ mergeCast(State * N, Function & llvmIrFunction,
 					if (sourceOp->getType() == llvmIrInstruction->getType())
 					{
 						llvmIrInstruction->replaceAllUsesWith(sourceOp);
-						llvmIrInstruction->removeFromParent();
+						llvmIrInstruction->eraseFromParent();
 						break;
 					}
 					auto sourceInst = llvm::dyn_cast<llvm::Instruction>(sourceOp);
@@ -1724,23 +1744,23 @@ mergeCast(State * N, Function & llvmIrFunction,
 								 * */
 								Value * castInst;
 								auto	valueType = llvmIrInstruction->getType();
-                                if ((valueType->isFloatTy() || valueType->isDoubleTy()) &&
-                                    sourceOperand->getType()->isIntegerTy())
-                                {
-                                    // float fa = (float)ia;
-                                    bool isSigned = sourceInst->getOpcode() == Instruction::SIToFP;
-                                    castInst      = isSigned ? Builder.CreateSIToFP(sourceOperand, valueType)
-                                                             : Builder.CreateUIToFP(sourceOperand, valueType);
-                                }
-                                else if (valueType->isIntegerTy() &&
-                                         (sourceOperand->getType()->isFloatTy() || sourceOperand->getType()->isDoubleTy()))
-                                {
-                                    // int iq = (int)fq;
-                                    bool isSigned = sourceInst->getOpcode() == Instruction::FPToSI;
-                                    castInst      = isSigned ? Builder.CreateFPToSI(sourceOperand, valueType)
-                                                             : Builder.CreateFPToUI(sourceOperand, valueType);
-                                }
-                                else if (valueType->isIntegerTy())
+								if ((valueType->isFloatTy() || valueType->isDoubleTy()) &&
+								    sourceOperand->getType()->isIntegerTy())
+								{
+									// float fa = (float)ia;
+									bool isSigned = sourceInst->getOpcode() == Instruction::SIToFP;
+									castInst      = isSigned ? Builder.CreateSIToFP(sourceOperand, valueType)
+												 : Builder.CreateUIToFP(sourceOperand, valueType);
+								}
+								else if (valueType->isIntegerTy() &&
+									 (sourceOperand->getType()->isFloatTy() || sourceOperand->getType()->isDoubleTy()))
+								{
+									// int iq = (int)fq;
+									bool isSigned = sourceInst->getOpcode() == Instruction::FPToSI;
+									castInst      = isSigned ? Builder.CreateFPToSI(sourceOperand, valueType)
+												 : Builder.CreateFPToUI(sourceOperand, valueType);
+								}
+								else if (valueType->isIntegerTy())
 								{
 									castInst = Builder.CreateIntCast(sourceOperand, valueType,
 													 llvmIrInstruction->getOpcode() == Instruction::SExt);
@@ -1749,10 +1769,10 @@ mergeCast(State * N, Function & llvmIrFunction,
 								{
 									castInst = Builder.CreateFPCast(sourceOperand, valueType);
 								}
-                                else
-                                {
-                                    castInst = Builder.CreateBitCast(sourceOperand, valueType);
-                                }
+								else
+								{
+									castInst = Builder.CreateBitCast(sourceOperand, valueType);
+								}
 								auto vrIt = virtualRegisterRange.find(sourceOperand);
 								if (castInst != nullptr && vrIt != virtualRegisterRange.end())
 								{
@@ -1777,7 +1797,7 @@ mergeCast(State * N, Function & llvmIrFunction,
 								llvmIrInstruction->replaceAllUsesWith(newCastInst);
 								sourceInstVec.emplace_back(newCastInst);
 							}
-							llvmIrInstruction->removeFromParent();
+							llvmIrInstruction->eraseFromParent();
 						}
 						else
 						{
@@ -1851,10 +1871,10 @@ countCastInst(State * N, Function & llvmIrFunction)
 		{
 			switch (llvmIrInstruction.getOpcode())
 			{
-                case Instruction::FPToUI:
-                case Instruction::FPToSI:
-                case Instruction::SIToFP:
-                case Instruction::UIToFP:
+				case Instruction::FPToUI:
+				case Instruction::FPToSI:
+				case Instruction::SIToFP:
+				case Instruction::UIToFP:
 				case Instruction::ZExt:
 				case Instruction::SExt:
 				case Instruction::FPExt:
@@ -2039,157 +2059,173 @@ getDependencyLink(State * N, Function & llvmIrFunction)
  * */
 void
 upDateInstSignFlag(State * N, Function & llvmIrFunction,
-                   std::map<llvm::Value *, std::pair<double, double>> & virtualRegisterRange,
-                   std::map<Value *, typeInfo> & typeChangedInst) {
-    for (BasicBlock & llvmIrBasicBlock : llvmIrFunction) {
-        for (BasicBlock::iterator itBB = llvmIrBasicBlock.begin(); itBB != llvmIrBasicBlock.end();) {
-            Instruction *llvmIrInstruction = &*itBB++;
-            if (llvmIrInstruction->getNumOperands() < 2) {
-                continue;
-            }
-            auto lhs = llvmIrInstruction->getOperand(0);
-            auto rhs = llvmIrInstruction->getOperand(1);
-            auto lhsIt = typeChangedInst.find(lhs);
-            auto rhsIt = typeChangedInst.find(rhs);
-            if ((lhsIt != typeChangedInst.end() || rhsIt != typeChangedInst.end())) {
-                // debug info: to check the range of operands
-                auto vrLhsIt = virtualRegisterRange.find(lhs);
-                auto vrRhsIt = virtualRegisterRange.find(rhs);
-//                assert(vrLhsIt != virtualRegisterRange.end() && vrRhsIt != virtualRegisterRange.end());
-                switch (llvmIrInstruction->getOpcode()) {
-                    case Instruction::Add:
-                    case Instruction::Sub:
-                    case Instruction::Mul:
-                    case Instruction::Shl:
-                    {
-                        /*
-                         * nsw/nuw
-                         * Implement when meet
-                         * */
-//                        if (lhsIt->second.signFlag || rhsIt->second.signFlag) {
-                            if (llvmIrInstruction->hasNoUnsignedWrap()) {
-                                /*
-                                 * change to `nsw`
-                                 * */
-                                llvmIrInstruction->setHasNoUnsignedWrap(false);
-                            }
-//                        } else {
-                            if (llvmIrInstruction->hasNoSignedWrap()) {
-                                /*
-                                 * change to `nuw`
-                                 * */
-                                llvmIrInstruction->setHasNoSignedWrap(false);
-                            }
-//                        }
-//                        flexprint(N->Fe, N->Fm, N->Fperr,
-//                                  "\tupDateInstSignFlag with nsw/nuw: Not Implement!\n");
-                        break;
-                    }
-                    /*
-                     * Different inst for signed/unsigned.
-                     * Should also care about
-                     *  1. the extent.
-                     *  2. one operand is signed, the other is unsigned.
-                     * Check the LLVM Ref: https://llvm.org/docs/LangRef.html#llvm-language-reference-manual
-                     * Implement when meet.
-                     * */
-                    case Instruction::SDiv:
-                    {
-                        if (!lhsIt->second.signFlag && !rhsIt->second.signFlag) {
-                            IRBuilder<> Builder(&llvmIrBasicBlock);
-                            Builder.SetInsertPoint(llvmIrInstruction);
-                            auto UDivInst = Builder.CreateUDiv(lhs, rhs);
-                            llvmIrInstruction->replaceAllUsesWith(UDivInst);
-                            llvmIrInstruction->removeFromParent();
-                        }
-                        break;
-                    }
-                    case Instruction::SRem:
-                    {
-                        if (!lhsIt->second.signFlag && !rhsIt->second.signFlag) {
-                            IRBuilder<> Builder(&llvmIrBasicBlock);
-                            Builder.SetInsertPoint(llvmIrInstruction);
-                            auto URemInst = Builder.CreateURem(lhs, rhs);
-                            llvmIrInstruction->replaceAllUsesWith(URemInst);
-                            llvmIrInstruction->removeFromParent();
-                        }
-                        break;
-                    }
-                    case Instruction::AShr:
-                    {
-                        if (!lhsIt->second.signFlag && !rhsIt->second.signFlag) {
-                            IRBuilder<> Builder(&llvmIrBasicBlock);
-                            Builder.SetInsertPoint(llvmIrInstruction);
-                            auto LShrInst = Builder.CreateLShr(lhs, rhs);
-                            llvmIrInstruction->replaceAllUsesWith(LShrInst);
-                            llvmIrInstruction->removeFromParent();
-                        }
-                        break;
-                    }
-                    case Instruction::ICmp:
-                        if (auto llvmIrICmpInstruction = dyn_cast<ICmpInst>(llvmIrInstruction))
-                        {
-                            if (llvmIrICmpInstruction->isUnsigned()) {
-                                break;
-                            }
-                            auto lhs  = llvmIrICmpInstruction->getOperand(0);
-                            auto rhs = llvmIrICmpInstruction->getOperand(1);
-                            /*
-                             * If either of the operand is constant,
-                             * and the variable operand can only change from `signed` to `unsigned`,
-                             * so we only care about when the variable operand is `unsigned`.
-                             * Note: here's instruction is signed!
-                             *  if the constant operand is negative value, the `scf by range` should simplify it
-                             *  if the constant operand is positive value, we can use `unsigned` flag
-                             * */
-                            if ((isa<llvm::Constant>(lhs) && !isa<llvm::Constant>(rhs)))
-                            {
-                                llvmIrICmpInstruction->swapOperands();
-                                lhs  = llvmIrICmpInstruction->getOperand(0);
-                                rhs = llvmIrICmpInstruction->getOperand(1);
-                            }
-                            if (!isa<llvm::Constant>(lhs) && isa<llvm::Constant>(rhs)) {
-                                ConstantInt * constInt = llvm::dyn_cast<llvm::ConstantInt>(rhs);
-                                assert(nullptr != constInt && "ICmp: it's not a const int!!!!!!!!!!!\n");
-                                if (constInt->getSExtValue() < 0) {
-                                    /*
-                                     * the `scf by range` should simplify it
-                                     * */
-                                    break;
-                                }
+		   std::map<llvm::Value *, std::pair<double, double>> & virtualRegisterRange,
+		   std::map<Value *, typeInfo> &			typeChangedInst)
+{
+	for (BasicBlock & llvmIrBasicBlock : llvmIrFunction)
+	{
+		for (BasicBlock::iterator itBB = llvmIrBasicBlock.begin(); itBB != llvmIrBasicBlock.end();)
+		{
+			Instruction * llvmIrInstruction = &*itBB++;
+			if (llvmIrInstruction->getNumOperands() < 2)
+			{
+				continue;
+			}
+			auto lhs   = llvmIrInstruction->getOperand(0);
+			auto rhs   = llvmIrInstruction->getOperand(1);
+			auto lhsIt = typeChangedInst.find(lhs);
+			auto rhsIt = typeChangedInst.find(rhs);
+			if ((lhsIt != typeChangedInst.end() || rhsIt != typeChangedInst.end()))
+			{
+				// debug info: to check the range of operands
+				auto vrLhsIt = virtualRegisterRange.find(lhs);
+				auto vrRhsIt = virtualRegisterRange.find(rhs);
+				//                assert(vrLhsIt != virtualRegisterRange.end() && vrRhsIt != virtualRegisterRange.end());
+				switch (llvmIrInstruction->getOpcode())
+				{
+					case Instruction::Add:
+					case Instruction::Sub:
+					case Instruction::Mul:
+					case Instruction::Shl:
+					{
+						/*
+						 * nsw/nuw
+						 * Implement when meet
+						 * */
+						//                        if (lhsIt->second.signFlag || rhsIt->second.signFlag) {
+						if (llvmIrInstruction->hasNoUnsignedWrap())
+						{
+							/*
+							 * change to `nsw`
+							 * */
+							llvmIrInstruction->setHasNoUnsignedWrap(false);
+						}
+						//                        } else {
+						if (llvmIrInstruction->hasNoSignedWrap())
+						{
+							/*
+							 * change to `nuw`
+							 * */
+							llvmIrInstruction->setHasNoSignedWrap(false);
+						}
+						//                        }
+						//                        flexprint(N->Fe, N->Fm, N->Fperr,
+						//                                  "\tupDateInstSignFlag with nsw/nuw: Not Implement!\n");
+						break;
+					}
+					/*
+					 * Different inst for signed/unsigned.
+					 * Should also care about
+					 *  1. the extent.
+					 *  2. one operand is signed, the other is unsigned.
+					 * Check the LLVM Ref: https://llvm.org/docs/LangRef.html#llvm-language-reference-manual
+					 * Implement when meet.
+					 * */
+					case Instruction::SDiv:
+					{
+						if (!lhsIt->second.signFlag && !rhsIt->second.signFlag)
+						{
+							IRBuilder<> Builder(&llvmIrBasicBlock);
+							Builder.SetInsertPoint(llvmIrInstruction);
+							auto UDivInst = Builder.CreateUDiv(lhs, rhs);
+							llvmIrInstruction->replaceAllUsesWith(UDivInst);
+							llvmIrInstruction->eraseFromParent();
+						}
+						break;
+					}
+					case Instruction::SRem:
+					{
+						if (!lhsIt->second.signFlag && !rhsIt->second.signFlag)
+						{
+							IRBuilder<> Builder(&llvmIrBasicBlock);
+							Builder.SetInsertPoint(llvmIrInstruction);
+							auto URemInst = Builder.CreateURem(lhs, rhs);
+							llvmIrInstruction->replaceAllUsesWith(URemInst);
+							llvmIrInstruction->eraseFromParent();
+						}
+						break;
+					}
+					case Instruction::AShr:
+					{
+						if (!lhsIt->second.signFlag && !rhsIt->second.signFlag)
+						{
+							IRBuilder<> Builder(&llvmIrBasicBlock);
+							Builder.SetInsertPoint(llvmIrInstruction);
+							auto LShrInst = Builder.CreateLShr(lhs, rhs);
+							llvmIrInstruction->replaceAllUsesWith(LShrInst);
+							llvmIrInstruction->eraseFromParent();
+						}
+						break;
+					}
+					case Instruction::ICmp:
+						if (auto llvmIrICmpInstruction = dyn_cast<ICmpInst>(llvmIrInstruction))
+						{
+							if (llvmIrICmpInstruction->isUnsigned())
+							{
+								break;
+							}
+							auto lhs = llvmIrICmpInstruction->getOperand(0);
+							auto rhs = llvmIrICmpInstruction->getOperand(1);
+							/*
+							 * If either of the operand is constant,
+							 * and the variable operand can only change from `signed` to `unsigned`,
+							 * so we only care about when the variable operand is `unsigned`.
+							 * Note: here's instruction is signed!
+							 *  if the constant operand is negative value, the `scf by range` should simplify it
+							 *  if the constant operand is positive value, we can use `unsigned` flag
+							 * */
+							if ((isa<llvm::Constant>(lhs) && !isa<llvm::Constant>(rhs)))
+							{
+								llvmIrICmpInstruction->swapOperands();
+								lhs = llvmIrICmpInstruction->getOperand(0);
+								rhs = llvmIrICmpInstruction->getOperand(1);
+							}
+							if (!isa<llvm::Constant>(lhs) && isa<llvm::Constant>(rhs))
+							{
+								ConstantInt * constInt = llvm::dyn_cast<llvm::ConstantInt>(rhs);
+								assert(nullptr != constInt && "ICmp: it's not a const int!!!!!!!!!!!\n");
+								if (constInt->getSExtValue() < 0)
+								{
+									/*
+									 * the `scf by range` should simplify it
+									 * */
+									break;
+								}
 
-                                auto originalPred = llvmIrICmpInstruction->getPredicate();
-                                llvmIrICmpInstruction->setPredicate(ICmpInst::getUnsignedPredicate(originalPred));
-                            } else if (!lhsIt->second.signFlag && !rhsIt->second.signFlag) {
-                                /*
-                                 * If both of the operands are variable with different sign bit,
-                                 * we check the range of them (if we can), e.g.
-                                 *
-                                 *  %c = icmp slt i16 %a, %b
-                                 *
-                                 *  if the %a is unsigned, but the max range is less than 32767, we can ignore it.
-                                 *  otherwise, it overflows, and we should extend the operands, like,
-                                 *
-                                 *  %c = sext i16 %a to i32
-                                 *  %d = sext i16 %b to i32
-                                 *  %e = icmp slt i32 %c, %d
-                                 *  %f = trunc i32 %c to i16
-                                 *  %g = trunc i32 %d to i16
-                                 *
-                                 *  Then we replace the `%f`, `%g` to `%a`, `%b`.
-                                 *  And also replace the `%e` to the previous icmp result.
-                                 * */
-                                auto originalPred = llvmIrICmpInstruction->getPredicate();
-                                llvmIrICmpInstruction->setPredicate(ICmpInst::getUnsignedPredicate(originalPred));
-//                                flexprint(N->Fe, N->Fm, N->Fperr,
-//                                          "\tupDateInstSignFlag ICmp with both variable: Not Implement!\n");
-                            }
-                            break;
-                        }
-                }
-            }
-        }
-    }
+								auto originalPred = llvmIrICmpInstruction->getPredicate();
+								llvmIrICmpInstruction->setPredicate(ICmpInst::getUnsignedPredicate(originalPred));
+							}
+							else if (!lhsIt->second.signFlag && !rhsIt->second.signFlag)
+							{
+								/*
+								 * If both of the operands are variable with different sign bit,
+								 * we check the range of them (if we can), e.g.
+								 *
+								 *  %c = icmp slt i16 %a, %b
+								 *
+								 *  if the %a is unsigned, but the max range is less than 32767, we can ignore it.
+								 *  otherwise, it overflows, and we should extend the operands, like,
+								 *
+								 *  %c = sext i16 %a to i32
+								 *  %d = sext i16 %b to i32
+								 *  %e = icmp slt i32 %c, %d
+								 *  %f = trunc i32 %c to i16
+								 *  %g = trunc i32 %d to i16
+								 *
+								 *  Then we replace the `%f`, `%g` to `%a`, `%b`.
+								 *  And also replace the `%e` to the previous icmp result.
+								 * */
+								auto originalPred = llvmIrICmpInstruction->getPredicate();
+								llvmIrICmpInstruction->setPredicate(ICmpInst::getUnsignedPredicate(originalPred));
+								//                                flexprint(N->Fe, N->Fm, N->Fperr,
+								//                                          "\tupDateInstSignFlag ICmp with both variable: Not Implement!\n");
+							}
+							break;
+						}
+				}
+			}
+		}
+	}
 }
 
 void
@@ -2199,10 +2235,10 @@ shrinkType(State * N, BoundInfo * boundInfo, Function & llvmIrFunction)
 	 * 1. construct instruction dependency link
 	 * 2. work with roll back strategies
 	 * */
-    std::map<Value *, typeInfo> typeChangedInst = shrinkInstType(N, boundInfo, llvmIrFunction);
+	std::map<Value *, typeInfo> typeChangedInst = shrinkInstType(N, boundInfo, llvmIrFunction);
 
 	mergeCast(N, llvmIrFunction, boundInfo->virtualRegisterRange, typeChangedInst);
 
-    upDateInstSignFlag(N, llvmIrFunction, boundInfo->virtualRegisterRange, typeChangedInst);
+	upDateInstSignFlag(N, llvmIrFunction, boundInfo->virtualRegisterRange, typeChangedInst);
 }
 }

@@ -307,7 +307,10 @@ checkPhiRange(State * N, PHINode * phiNode, BoundInfo * boundInfo,
 
 	if (minValueVec.empty() && minPHIValueVectors.empty())
 	{
-		flexprint(N->Fe, N->Fm, N->Fperr, "Error: min value vectors are both empty.");
+		if (valueRangeDebug)
+		{
+			flexprint(N->Fe, N->Fm, N->Fpinfo, "Call: skip empty PHI incoming range set.\n");
+		}
 	}
 
 	return true;
@@ -999,13 +1002,14 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 									 */
 									if (derivedVariableType->getTag() == llvm::dwarf::DW_TAG_pointer_type)
 									{
-                                        auto baseType = derivedVariableType->getBaseType();
-                                        /*
-                                         * the type is `void*`
-                                         * */
-                                        if (nullptr != baseType) {
-                                            baseTypeName = derivedVariableType->getBaseType()->getName().str();
-                                        }
+										auto baseType = derivedVariableType->getBaseType();
+										/*
+										 * the type is `void*`
+										 * */
+										if (nullptr != baseType)
+										{
+											baseTypeName = derivedVariableType->getBaseType()->getName().str();
+										}
 									}
 									else
 									{
@@ -1023,7 +1027,10 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 									}
 									else
 									{
-										flexprint(N->Fe, N->Fm, N->Fperr, "\tTODO: Call: Didn't support current type!\n");
+										if (valueRangeDebug)
+										{
+											flexprint(N->Fe, N->Fm, N->Fpinfo, "\tCall: Skip unsupported debug type for range seeding.\n");
+										}
 									}
 								}
 								else if (const auto * basicVariableType = dyn_cast<DIBasicType>(variableType))
@@ -1031,7 +1038,10 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 									/*
 									 * if it's a basic type, insert the basic
 									 * */
-									flexprint(N->Fe, N->Fm, N->Fperr, "\tTODO: Call: Didn't support basic type!\n");
+									if (valueRangeDebug)
+									{
+										flexprint(N->Fe, N->Fm, N->Fpinfo, "\tCall: Skip unsupported basic debug type for range seeding.\n");
+									}
 								}
 							};
 
@@ -1189,9 +1199,9 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 								 * */
 								flexprint(N->Fe, N->Fm, N->Fpinfo, "\tCall: detect calledFunction %s.\n",
 									  calledFunction->getName().str().c_str());
-								std::string newFuncName = calledFunction->getName().str();
-								auto innerBoundInfo   = new BoundInfo();
-								bool hasSpecificRange = false;
+								std::string newFuncName	     = calledFunction->getName().str();
+								auto	    innerBoundInfo   = new BoundInfo();
+								bool	    hasSpecificRange = false;
 								/*
 								 * check if the ranges have been set to the function name
 								 * */
@@ -1369,26 +1379,32 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 
 									returnRange = rangeAnalysis(N, *realCallee, overloadBoundInfo, callerMap,
 												    typeRange, virtualRegisterVectorRange, useOverLoad);
-                                    /*
-                                    * If the "realCallee" pass arguments by pointer, update the pointer argus.
-                                    * If the outer function have such operand value, but doesn't exist after the callee,
-                                    *  remove it from boundInfo->virtualRegisterRange
-                                    * If both exist before and after callee, then update its value.
-                                    * */
-                                    for (size_t idx = 0; idx < llvmIrCallInstruction->getNumOperands() - 1; idx++) {
-                                        auto operand = llvmIrCallInstruction->getOperand(idx);
-                                        if (operand->getType()->getTypeID() == Type::PointerTyID) {
-                                            auto vrIt = boundInfo->virtualRegisterRange.find(operand);
-                                            if (vrIt != boundInfo->virtualRegisterRange.end()) {
-                                                auto ibIt = innerBoundInfo->virtualRegisterRange.find(operand);
-                                                if (ibIt != innerBoundInfo->virtualRegisterRange.end()) {
-                                                    vrIt->second = ibIt->second;
-                                                } else {
-                                                    boundInfo->virtualRegisterRange.erase(vrIt);
-                                                }
-                                            }
-                                        }
-                                    }
+									/*
+									 * If the "realCallee" pass arguments by pointer, update the pointer argus.
+									 * If the outer function have such operand value, but doesn't exist after the callee,
+									 *  remove it from boundInfo->virtualRegisterRange
+									 * If both exist before and after callee, then update its value.
+									 * */
+									for (size_t idx = 0; idx < llvmIrCallInstruction->getNumOperands() - 1; idx++)
+									{
+										auto operand = llvmIrCallInstruction->getOperand(idx);
+										if (operand->getType()->getTypeID() == Type::PointerTyID)
+										{
+											auto vrIt = boundInfo->virtualRegisterRange.find(operand);
+											if (vrIt != boundInfo->virtualRegisterRange.end())
+											{
+												auto ibIt = innerBoundInfo->virtualRegisterRange.find(operand);
+												if (ibIt != innerBoundInfo->virtualRegisterRange.end())
+												{
+													vrIt->second = ibIt->second;
+												}
+												else
+												{
+													boundInfo->virtualRegisterRange.erase(vrIt);
+												}
+											}
+										}
+									}
 									if (returnRange.first != nullptr)
 									{
 										boundInfo->virtualRegisterRange.emplace(llvmIrCallInstruction, returnRange.second);
@@ -1404,26 +1420,32 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 									realCallee  = calledFunction;
 									returnRange = rangeAnalysis(N, *realCallee, innerBoundInfo, callerMap,
 												    typeRange, virtualRegisterVectorRange, useOverLoad);
-                                    /*
-                                     * If the "realCallee" pass arguments by pointer, update the pointer argus.
-                                     * If the outer function have such operand value, but doesn't exist after the callee,
-                                     *  remove it from boundInfo->virtualRegisterRange
-                                     * If both exist before and after callee, then update its value.
-                                     * */
-                                    for (size_t idx = 0; idx < llvmIrCallInstruction->getNumOperands() - 1; idx++) {
-                                        auto operand = llvmIrCallInstruction->getOperand(idx);
-                                        if (operand->getType()->getTypeID() == Type::PointerTyID) {
-                                            auto vrIt = boundInfo->virtualRegisterRange.find(operand);
-                                            if (vrIt != boundInfo->virtualRegisterRange.end()) {
-                                                auto ibIt = innerBoundInfo->virtualRegisterRange.find(operand);
-                                                if (ibIt != innerBoundInfo->virtualRegisterRange.end()) {
-                                                    vrIt->second = ibIt->second;
-                                                } else {
-                                                    boundInfo->virtualRegisterRange.erase(vrIt);
-                                                }
-                                            }
-                                        }
-                                    }
+									/*
+									 * If the "realCallee" pass arguments by pointer, update the pointer argus.
+									 * If the outer function have such operand value, but doesn't exist after the callee,
+									 *  remove it from boundInfo->virtualRegisterRange
+									 * If both exist before and after callee, then update its value.
+									 * */
+									for (size_t idx = 0; idx < llvmIrCallInstruction->getNumOperands() - 1; idx++)
+									{
+										auto operand = llvmIrCallInstruction->getOperand(idx);
+										if (operand->getType()->getTypeID() == Type::PointerTyID)
+										{
+											auto vrIt = boundInfo->virtualRegisterRange.find(operand);
+											if (vrIt != boundInfo->virtualRegisterRange.end())
+											{
+												auto ibIt = innerBoundInfo->virtualRegisterRange.find(operand);
+												if (ibIt != innerBoundInfo->virtualRegisterRange.end())
+												{
+													vrIt->second = ibIt->second;
+												}
+												else
+												{
+													boundInfo->virtualRegisterRange.erase(vrIt);
+												}
+											}
+										}
+									}
 									if (returnRange.first != nullptr)
 									{
 										boundInfo->virtualRegisterRange.emplace(llvmIrCallInstruction, returnRange.second);
@@ -1452,10 +1474,11 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 								 * But we still believe in the range we inferred from the function body.
 								 */
 								DISubprogram * subProgram = realCallee->getSubprogram();
-                                if (nullptr == subProgram) {
-                                    break;
-                                }
-								DITypeRefArray typeArray  = subProgram->getType()->getTypeArray();
+								if (nullptr == subProgram)
+								{
+									break;
+								}
+								DITypeRefArray typeArray = subProgram->getType()->getTypeArray();
 								if (typeArray[0] != nullptr)
 								{
 									StringRef returnTypeName = typeArray[0]->getName();
@@ -1989,10 +2012,10 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 							{
 								switch (bitWidth)
 								{
-                                    case 1:
-                                        lowerBound = static_cast<double>(static_cast<bool>(vrRangeIt->second.first));
-                                        upperBound = static_cast<double>(static_cast<bool>(vrRangeIt->second.second));
-                                        break;
+									case 1:
+										lowerBound = static_cast<double>(static_cast<bool>(vrRangeIt->second.first));
+										upperBound = static_cast<double>(static_cast<bool>(vrRangeIt->second.second));
+										break;
 									case 8:
 										lowerBound = static_cast<double>(static_cast<uint8_t>(vrRangeIt->second.first));
 										upperBound = static_cast<double>(static_cast<uint8_t>(vrRangeIt->second.second));
@@ -2021,18 +2044,18 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 							vrRangeIt = boundInfo->virtualRegisterRange.find(rightOperand);
 							if (vrRangeIt != boundInfo->virtualRegisterRange.end())
 							{
-								auto   leftMin = lowerBound;
-								auto   leftMax = upperBound;
-                                double rightMin = vrRangeIt->second.first;
-                                double rightMax = vrRangeIt->second.second;
-								lowerBound = min(min(min((uint64_t)leftMin << (int64_t)rightMin,
-											 (uint64_t)leftMin << (int64_t)rightMax),
-										     (uint64_t)leftMax << (int64_t)rightMin),
-										 (uint64_t)leftMax << (int64_t)rightMax);
-								upperBound = max(max(max((uint64_t)leftMin << (int64_t)rightMin,
-											 (uint64_t)leftMin << (int64_t)rightMax),
-										     (uint64_t)leftMax << (int64_t)rightMin),
-										 (uint64_t)leftMax << (int64_t)rightMax);
+								auto   leftMin	= lowerBound;
+								auto   leftMax	= upperBound;
+								double rightMin = vrRangeIt->second.first;
+								double rightMax = vrRangeIt->second.second;
+								lowerBound	= min(min(min((uint64_t)leftMin << (int64_t)rightMin,
+											      (uint64_t)leftMin << (int64_t)rightMax),
+											  (uint64_t)leftMax << (int64_t)rightMin),
+										      (uint64_t)leftMax << (int64_t)rightMax);
+								upperBound	= max(max(max((uint64_t)leftMin << (int64_t)rightMin,
+											      (uint64_t)leftMin << (int64_t)rightMax),
+											  (uint64_t)leftMax << (int64_t)rightMin),
+										      (uint64_t)leftMax << (int64_t)rightMax);
 							}
 							else
 							{
@@ -2063,10 +2086,10 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 								double lowerBound, upperBound;
 								switch (bitWidth)
 								{
-                                    case 1:
-                                        lowerBound = constValue << (static_cast<bool>(vrRangeIt->second.first));
-                                        upperBound = constValue << (static_cast<bool>(vrRangeIt->second.second));
-                                        break;
+									case 1:
+										lowerBound = constValue << (static_cast<bool>(vrRangeIt->second.first));
+										upperBound = constValue << (static_cast<bool>(vrRangeIt->second.second));
+										break;
 									case 8:
 										lowerBound = constValue << (static_cast<uint8_t>(vrRangeIt->second.first));
 										upperBound = constValue << (static_cast<uint8_t>(vrRangeIt->second.second));
@@ -2111,10 +2134,10 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 								double resMin = 0, resMax = 0;
 								switch (bitWidth)
 								{
-                                    case 1:
-                                        resMin = static_cast<bool>(vrRangeIt->second.first) << constValue;
-                                        resMax = static_cast<bool>(vrRangeIt->second.second) << constValue;
-                                        break;
+									case 1:
+										resMin = static_cast<bool>(vrRangeIt->second.first) << constValue;
+										resMax = static_cast<bool>(vrRangeIt->second.second) << constValue;
+										break;
 									case 8:
 										resMin = static_cast<uint8_t>(vrRangeIt->second.first) << constValue;
 										resMax = static_cast<uint8_t>(vrRangeIt->second.second) << constValue;
@@ -2134,13 +2157,13 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 									default:
 										assert(false);
 								}
-                                /*
-                                 * lhs of shl can be negative, but the result should be positive.
-                                 * so we need to further check the real min value and real max value
-                                 * */
+								/*
+								 * lhs of shl can be negative, but the result should be positive.
+								 * so we need to further check the real min value and real max value
+								 * */
 								boundInfo->virtualRegisterRange.emplace(llvmIrBinaryOperator,
-                                                                        std::make_pair(min(resMin, resMax),
-                                                                                       max(resMin, resMax)));
+													std::make_pair(min(resMin, resMax),
+														       max(resMin, resMax)));
 							}
 							else
 							{
@@ -2155,9 +2178,9 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 					}
 					break;
 
-                /*
-                 * Sign extend
-                 * */
+					/*
+					 * Sign extend
+					 * */
 				case Instruction::AShr:
 					if (auto llvmIrBinaryOperator = dyn_cast<BinaryOperator>(&llvmIrInstruction))
 					{
@@ -2185,8 +2208,8 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 							auto vrRangeIt = boundInfo->virtualRegisterRange.find(leftOperand);
 							if (vrRangeIt != boundInfo->virtualRegisterRange.end())
 							{
-                                leftMin = vrRangeIt->second.first;
-                                leftMax = vrRangeIt->second.second;
+								leftMin = vrRangeIt->second.first;
+								leftMax = vrRangeIt->second.second;
 							}
 							else
 							{
@@ -2198,16 +2221,16 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 							if (vrRangeIt != boundInfo->virtualRegisterRange.end())
 							{
 								double rightMin = 0, rightMax = 0;
-                                rightMin = vrRangeIt->second.first;
-                                rightMax = vrRangeIt->second.second;
+								rightMin   = vrRangeIt->second.first;
+								rightMax   = vrRangeIt->second.second;
 								lowerBound = min(min(min(static_cast<int64_t>(leftMin) >> static_cast<uint64_t>(rightMin),
-                                                         static_cast<int64_t>(leftMin) >> static_cast<uint64_t>(rightMax)),
-                                                     static_cast<int64_t>(leftMax) >> static_cast<uint64_t>(rightMin)),
-                                                 static_cast<int64_t>(leftMax) >> static_cast<uint64_t>(rightMax));
+											 static_cast<int64_t>(leftMin) >> static_cast<uint64_t>(rightMax)),
+										     static_cast<int64_t>(leftMax) >> static_cast<uint64_t>(rightMin)),
+										 static_cast<int64_t>(leftMax) >> static_cast<uint64_t>(rightMax));
 								upperBound = max(max(max(static_cast<int64_t>(leftMin) >> static_cast<uint64_t>(rightMin),
-                                                         static_cast<int64_t>(leftMin) >> static_cast<uint64_t>(rightMax)),
-                                                     static_cast<int64_t>(leftMax) >> static_cast<uint64_t>(rightMin)),
-                                                 static_cast<int64_t>(leftMax) >> static_cast<uint64_t>(rightMax));
+											 static_cast<int64_t>(leftMin) >> static_cast<uint64_t>(rightMax)),
+										     static_cast<int64_t>(leftMax) >> static_cast<uint64_t>(rightMin)),
+										 static_cast<int64_t>(leftMax) >> static_cast<uint64_t>(rightMax));
 							}
 							else
 							{
@@ -2238,10 +2261,10 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 								double lowerBound, upperBound;
 								switch (bitWidth)
 								{
-                                    case 1:
-                                        lowerBound = constValue >> (static_cast<bool>(vrRangeIt->second.first));
-                                        upperBound = constValue >> (static_cast<bool>(vrRangeIt->second.second));
-                                        break;
+									case 1:
+										lowerBound = constValue >> (static_cast<bool>(vrRangeIt->second.first));
+										upperBound = constValue >> (static_cast<bool>(vrRangeIt->second.second));
+										break;
 									case 8:
 										lowerBound = constValue >> (static_cast<uint8_t>(vrRangeIt->second.first));
 										upperBound = constValue >> (static_cast<uint8_t>(vrRangeIt->second.second));
@@ -2286,10 +2309,10 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 								double resMin = 0, resMax = 0;
 								switch (bitWidth)
 								{
-                                    case 1:
-                                        resMin = static_cast<bool>(vrRangeIt->second.first) >> constValue;
-                                        resMax = static_cast<bool>(vrRangeIt->second.second) >> constValue;
-                                        break;
+									case 1:
+										resMin = static_cast<bool>(vrRangeIt->second.first) >> constValue;
+										resMax = static_cast<bool>(vrRangeIt->second.second) >> constValue;
+										break;
 									case 8:
 										resMin = static_cast<int8_t>(vrRangeIt->second.first) >> constValue;
 										resMax = static_cast<int8_t>(vrRangeIt->second.second) >> constValue;
@@ -2325,9 +2348,9 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 					}
 					break;
 
-                /*
-                 * Zero extend
-                 * */
+					/*
+					 * Zero extend
+					 * */
 				case Instruction::LShr:
 					if (auto llvmIrBinaryOperator = dyn_cast<BinaryOperator>(&llvmIrInstruction))
 					{
@@ -2357,10 +2380,10 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 							{
 								switch (bitWidth)
 								{
-                                    case 1:
-                                        leftMin = static_cast<double>(static_cast<bool>(vrRangeIt->second.first));
-                                        leftMax = static_cast<double>(static_cast<bool>(vrRangeIt->second.second));
-                                        break;
+									case 1:
+										leftMin = static_cast<double>(static_cast<bool>(vrRangeIt->second.first));
+										leftMax = static_cast<double>(static_cast<bool>(vrRangeIt->second.second));
+										break;
 									case 8:
 										leftMin = static_cast<double>(static_cast<uint8_t>(vrRangeIt->second.first));
 										leftMax = static_cast<double>(static_cast<uint8_t>(vrRangeIt->second.second));
@@ -2393,10 +2416,10 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 								double rightMin = 0, rightMax = 0;
 								switch (bitWidth)
 								{
-                                    case 1:
-                                        rightMin = static_cast<bool>(vrRangeIt->second.first);
-                                        rightMax = static_cast<bool>(vrRangeIt->second.second);
-                                        break;
+									case 1:
+										rightMin = static_cast<bool>(vrRangeIt->second.first);
+										rightMax = static_cast<bool>(vrRangeIt->second.second);
+										break;
 									case 8:
 										rightMin = static_cast<uint8_t>(vrRangeIt->second.first);
 										rightMax = static_cast<uint8_t>(vrRangeIt->second.second);
@@ -2454,10 +2477,10 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 								double lowerBound, upperBound;
 								switch (bitWidth)
 								{
-                                    case 1:
-                                        lowerBound = constValue >> (static_cast<bool>(vrRangeIt->second.first));
-                                        upperBound = constValue >> (static_cast<bool>(vrRangeIt->second.second));
-                                        break;
+									case 1:
+										lowerBound = constValue >> (static_cast<bool>(vrRangeIt->second.first));
+										upperBound = constValue >> (static_cast<bool>(vrRangeIt->second.second));
+										break;
 									case 8:
 										lowerBound = constValue >> (static_cast<uint8_t>(vrRangeIt->second.first));
 										upperBound = constValue >> (static_cast<uint8_t>(vrRangeIt->second.second));
@@ -2502,10 +2525,10 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 								double resMin = 0, resMax = 0;
 								switch (bitWidth)
 								{
-                                    case 1:
-                                        resMin = (static_cast<bool>(vrRangeIt->second.first)) >> constValue;
-                                        resMax = (static_cast<bool>(vrRangeIt->second.second)) >> constValue;
-                                        break;
+									case 1:
+										resMin = (static_cast<bool>(vrRangeIt->second.first)) >> constValue;
+										resMax = (static_cast<bool>(vrRangeIt->second.second)) >> constValue;
+										break;
 									case 8:
 										resMin = (static_cast<uint8_t>(vrRangeIt->second.first)) >> constValue;
 										resMax = (static_cast<uint8_t>(vrRangeIt->second.second)) >> constValue;
@@ -2949,7 +2972,7 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 						 *    and reinterpret it if necessary
 						 * */
 						unionAddress.emplace(llvmIrBitCastInstruction, llvmIrBitCastInstruction->getOperand(0));
-						//assert(llvmIrBitCastInstruction->getDestTy()->getTypeID() == Type::PointerTyID);
+						// assert(llvmIrBitCastInstruction->getDestTy()->getTypeID() == Type::PointerTyID);
 						auto vrRangeIt = boundInfo->virtualRegisterRange.find(llvmIrBitCastInstruction->getOperand(0));
 						if (vrRangeIt != boundInfo->virtualRegisterRange.end())
 						{
@@ -2962,13 +2985,25 @@ rangeAnalysis(State * N, llvm::Function & llvmIrFunction, BoundInfo * boundInfo,
 							double originLow  = vrRangeIt->second.first;
 							double originHigh = vrRangeIt->second.second;
 							double lowRange, highRange;
-							auto   DestEleType = llvmIrBitCastInstruction->getDestTy()->getPointerElementType();
+							Type * destType = llvmIrBitCastInstruction->getDestTy();
+							if (!destType->isPointerTy())
+							{
+								flexprint(N->Fe, N->Fm, N->Fpinfo, "\tBitCast: destination type is not pointer, skipping union reinterpretation.\n");
+								boundInfo->virtualRegisterRange.emplace(llvmIrBitCastInstruction, vrRangeIt->second);
+								break;
+							}
+							auto   DestEleType   = destType->getPointerElementType();
+							Type * srcType	     = llvmIrBitCastInstruction->getSrcTy();
+							bool   srcStructType = srcType->isStructTy();
+							if (!srcStructType && srcType->isPointerTy())
+							{
+								srcStructType = srcType->getPointerElementType()->isStructTy();
+							}
 							/*
 							 * if it's a structure type, we use reinterpret_cast
 							 * todo: not very sure, need further check
 							 * */
-							if (llvmIrBitCastInstruction->getSrcTy()->isStructTy() ||
-							    llvmIrBitCastInstruction->getSrcTy()->getPointerElementType()->isStructTy())
+							if (srcStructType)
 							{
 								switch (DestEleType->getTypeID())
 								{

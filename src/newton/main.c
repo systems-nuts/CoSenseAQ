@@ -60,16 +60,14 @@
 #include "newton-symbolTable.h"
 #include "newton.h"
 
-
 int
-main(int argc, char *argv[])
+main(int argc, char * argv[])
 {
-	int		jumpParameter;
-	State *		N;
-
+	int	jumpParameter;
+	State * N;
 
 	N = init(kCommonModeDefault);
-	
+
 	if (N == NULL)
 	{
 		fatal(NULL, Emalloc);
@@ -81,51 +79,51 @@ main(int argc, char *argv[])
 
 	while (1)
 	{
-		char			tmp;
-		char *			ep = &tmp;
-		int			optionIndex	= 0, c;
-		static struct option	options[]	=
-		{
-			{"verbose",		required_argument,	0,	'v'},
-			{"help",		no_argument,		0,	'h'},
-			{"version",		no_argument,		0,	'V'},
-			{"dot",			required_argument,	0,	'd'},
-			{"smt",			required_argument,	0,	'S'},
-			{"bytecode",		required_argument,	0,	'b'},
-			{"trace",		no_argument,		0,	't'},
-			{"statistics",		no_argument,		0,	's'},
-			{"optimize",		required_argument,	0,	'O'},
-			{"dmatrixannote",	no_argument,		0,	'm'},
-			{"pigroups",		no_argument,		0,	'p'},
-			{"pigroupsfrombody",	no_argument,		0,	'i'},
-			{"kernelrowcanon",	no_argument,		0,	'c'},
-			{"pigroupsort",		no_argument,		0,	'r'},
-			{"pigroupdedup",	no_argument,		0,	'e'},
-			{"pikernelprinter",	no_argument,		0,	'P'},
-			{"pigrouptoast",	no_argument,		0,	'a'},
-			{"codegen",		required_argument,	0,	'g'},
-			{"latex",		no_argument,		0,	'x'},
-			{"RTLcodegen",		required_argument,	0,	'l'},
-			{"targetParam",		required_argument,	0,	'T'},
-			{"llvm-ir",             required_argument,      0,      'I'},
-			{"llvm-ir-liveness-check",    no_argument,      0,      'L'},
-            {"llvm-ir-enable-overload",    no_argument,      0,      'o'},
-            {"llvm-ir-enable-builtin-assume",    no_argument,      0,      'A'},
-            {"llvm-ir-auto-quantization",    no_argument,      0,      'Q'},
-			{"estimator-synthesis",	required_argument,	0,	420},
-			{"process",		required_argument,	0,	421},
-			{"measurement",		required_argument,	0,	422},
-			{"auto-diff",		no_argument,		0,	423},
-			{"ipsa",		required_argument,	0,	489},
-			{"kernelNumber",	required_argument,	0,	494},
-			{"piNumber",		required_argument,	0,	495},
-			{"physicalGroup1",	required_argument,	0,	491},
-			{"physicalGroup2",	required_argument,	0,	492},
-			{"generate-header",	required_argument,	0,	493},
-			{"signal-typedef-to",	required_argument,	0,	496},
-			{"no-sensors",		required_argument,	0,	550},
-			{0,			0,			0,	0}
-		};
+		char		     tmp;
+		char *		     ep		 = &tmp;
+		int		     optionIndex = 0, c;
+		static struct option options[] =
+		    {
+			{"verbose", required_argument, 0, 'v'},
+			{"help", no_argument, 0, 'h'},
+			{"version", no_argument, 0, 'V'},
+			{"dot", required_argument, 0, 'd'},
+			{"smt", required_argument, 0, 'S'},
+			{"bytecode", required_argument, 0, 'b'},
+			{"trace", no_argument, 0, 't'},
+			{"statistics", no_argument, 0, 's'},
+			{"optimize", required_argument, 0, 'O'},
+			{"dmatrixannote", no_argument, 0, 'm'},
+			{"pigroups", no_argument, 0, 'p'},
+			{"pigroupsfrombody", no_argument, 0, 'i'},
+			{"kernelrowcanon", no_argument, 0, 'c'},
+			{"pigroupsort", no_argument, 0, 'r'},
+			{"pigroupdedup", no_argument, 0, 'e'},
+			{"pikernelprinter", no_argument, 0, 'P'},
+			{"pigrouptoast", no_argument, 0, 'a'},
+			{"codegen", required_argument, 0, 'g'},
+			{"latex", no_argument, 0, 'x'},
+			{"RTLcodegen", required_argument, 0, 'l'},
+			{"targetParam", required_argument, 0, 'T'},
+			{"llvm-ir", required_argument, 0, 'I'},
+			{"llvm-ir-liveness-check", no_argument, 0, 'L'},
+			{"llvm-ir-enable-overload", no_argument, 0, 'o'},
+			{"llvm-ir-enable-builtin-assume", no_argument, 0, 'A'},
+			{"llvm-ir-auto-quantization", no_argument, 0, 'Q'},
+			{"llvm-ir-enable-quant-decider", no_argument, 0, 551},
+			{"estimator-synthesis", required_argument, 0, 420},
+			{"process", required_argument, 0, 421},
+			{"measurement", required_argument, 0, 422},
+			{"auto-diff", no_argument, 0, 423},
+			{"ipsa", required_argument, 0, 489},
+			{"kernelNumber", required_argument, 0, 494},
+			{"piNumber", required_argument, 0, 495},
+			{"physicalGroup1", required_argument, 0, 491},
+			{"physicalGroup2", required_argument, 0, 492},
+			{"generate-header", required_argument, 0, 493},
+			{"signal-typedef-to", required_argument, 0, 496},
+			{"no-sensors", required_argument, 0, 550},
+			{0, 0, 0, 0}};
 
 		c = getopt_long(argc, argv, "v:hVd:S:b:stO:mpicl:rePapg:xT:L:", options, &optionIndex);
 
@@ -292,7 +290,6 @@ main(int argc, char *argv[])
 
 				break;
 			}
-			
 
 			case 'c':
 			{
@@ -426,34 +423,34 @@ main(int argc, char *argv[])
 				break;
 			}
 
-            case 'o':
-            {
-                N->irPasses |= kNewtonirPassLLVMIREnableOverload;
-                break;
-            }
+			case 'o':
+			{
+				N->irPasses |= kNewtonirPassLLVMIREnableOverload;
+				break;
+			}
 
-            case 'A':
-            {
-                N->irPasses |= kNewtonirPassLLVMIREnableBuiltinAssume;
-                break;
-            }
+			case 'A':
+			{
+				N->irPasses |= kNewtonirPassLLVMIREnableBuiltinAssume;
+				break;
+			}
 
-            case 'Q':
-            {
-                N->irPasses |= kNewtonirPassLLVMIRAutoQuantization;
-                break;
-            }
+			case 'Q':
+			{
+				N->irPasses |= kNewtonirPassLLVMIRAutoQuantization;
+				break;
+			}
 
 			case 494:
 			{
-				N->kernelNumber = atoi(optarg);
+				N->kernelNumber	      = atoi(optarg);
 				N->enableKernelSelect = true;
 				break;
 			}
 
 			case 495:
 			{
-				N->piNumber = atoi(optarg);
+				N->piNumber	  = atoi(optarg);
 				N->enablePiSelect = true;
 				break;
 			}
@@ -497,6 +494,12 @@ main(int argc, char *argv[])
 			case 550:
 			{
 				N->irPasses |= kNewtonIrPassSensorsDisable;
+				break;
+			}
+
+			case 551:
+			{
+				N->irPasses |= kNewtonirPassLLVMIRQuantDeciderEnabled;
 				break;
 			}
 
@@ -558,46 +561,45 @@ main(int argc, char *argv[])
 	return 0;
 }
 
-
-
 void
-version(State *  N)
+version(State * N)
 {
 	flexprint(N->Fe, N->Fm, N->Fperr, "\nNewton version %s.\n\n", kNewtonVersion);
 }
 
-
 void
-usage(State *  N)
+usage(State * N)
 {
 	version(N);
-	flexprint(N->Fe, N->Fm, N->Fperr,	"Usage:    newton-<uname>-%s\n"
-						"                [ (--help, -h)                                               \n"
-						"                | (--version, --V)                                           \n"
-						"                | (--verbose <level>, -v <level>)                            \n"
-						"                | (--dot <level>, -d <level>)                                \n"
-						"                | (--smt <path to output file>, -S <path to output file>)    \n"
-						"                | (--bytecode <output file name>, -b <output file name>)     \n"
-						"                | (--optimize <level>, -O <level>)                           \n"
-						"                | (--dmatrixannote, -m)                                      \n"
-						"                | (--pigroups, -p)                                           \n"
-						"                | (--pigroupsfrombody, -i)                                   \n"
-						"                | (--kernelrowcanon, -c)                                     \n"
-						"                | (--pigroupsort, -r)                                        \n"
-						"                | (--pigroupdedup, -e)                                       \n"
-						"                | (--pikernelprinter, -P)                                    \n"
-						"                | (--pigrouptoast, -a)                                       \n"
-						"                | (--codegen <path to output file>, -g <path to output file>)\n"
-						"                | (--RTLcodegen <path to output file>, -l <path to output file>)\n"
-						"                | (--generate-header=<path to output file>					  \n"
-						"                | (--signal-typedef-to=<data type string>					  \n"
-						"                | (--trace, -t)                                              \n"
-						"                | (--statistics, -s)                                         \n"
-						"                | (--latex, -x)                                              \n"
-						"                | (--estimator-synthesis=<path to output file>)              \n"
-						"                | (--process=<process invariant identifier>)                 \n"
-						"                | (--measurement=<measurement invariant identifier>)         \n"
-						"                | (--auto-diff)                                      ]       \n"
-						"                                                                             \n"
-						"              <filenames>\n\n", kNewtonL10N);
+	flexprint(N->Fe, N->Fm, N->Fperr,
+		  "Usage:    newton-<uname>-%s\n"
+		  "                [ (--help, -h)                                               \n"
+		  "                | (--version, --V)                                           \n"
+		  "                | (--verbose <level>, -v <level>)                            \n"
+		  "                | (--dot <level>, -d <level>)                                \n"
+		  "                | (--smt <path to output file>, -S <path to output file>)    \n"
+		  "                | (--bytecode <output file name>, -b <output file name>)     \n"
+		  "                | (--optimize <level>, -O <level>)                           \n"
+		  "                | (--dmatrixannote, -m)                                      \n"
+		  "                | (--pigroups, -p)                                           \n"
+		  "                | (--pigroupsfrombody, -i)                                   \n"
+		  "                | (--kernelrowcanon, -c)                                     \n"
+		  "                | (--pigroupsort, -r)                                        \n"
+		  "                | (--pigroupdedup, -e)                                       \n"
+		  "                | (--pikernelprinter, -P)                                    \n"
+		  "                | (--pigrouptoast, -a)                                       \n"
+		  "                | (--codegen <path to output file>, -g <path to output file>)\n"
+		  "                | (--RTLcodegen <path to output file>, -l <path to output file>)\n"
+		  "                | (--generate-header=<path to output file>					  \n"
+		  "                | (--signal-typedef-to=<data type string>					  \n"
+		  "                | (--trace, -t)                                              \n"
+		  "                | (--statistics, -s)                                         \n"
+		  "                | (--latex, -x)                                              \n"
+		  "                | (--estimator-synthesis=<path to output file>)              \n"
+		  "                | (--process=<process invariant identifier>)                 \n"
+		  "                | (--measurement=<measurement invariant identifier>)         \n"
+		  "                | (--auto-diff)                                      ]       \n"
+		  "                                                                             \n"
+		  "              <filenames>\n\n",
+		  kNewtonL10N);
 }

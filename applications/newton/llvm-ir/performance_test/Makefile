@@ -377,9 +377,6 @@ perf_inferBoundControlFlow_opt: clean make_ll inferBoundControlFlow_opt compile_
 auto_test_compile:
 	clang++ auto_test.cpp -g -o auto_test
 
-auto_test_compile_woquant:
-	clang++ auto_test_woquant.cpp -g -o auto_test_woquant
-
 all: default
 
 default: perf_exp perf_exp_opt perf_log perf_log_opt perf_acosh perf_acosh_opt perf_j0 perf_j0_opt perf_y0 perf_y0_opt perf_rem_pio2 perf_rem_pio2_opt perf_sincosf perf_sincosf_opt perf_float64_add perf_float64_add_opt perf_float64_div perf_float64_div_opt perf_float64_mul perf_float64_mul_opt perf_float64_sin perf_float64_sin_opt perf_arm_sqrt_q15 perf_arm_sqrt_q15_opt auto_test_compile

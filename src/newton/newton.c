@@ -91,14 +91,13 @@
 #include "newton-irPass-signalTypedefGenerationBackend.h"
 #include "newton-irPass-sensors.h"
 
-extern char *	gNewtonAstNodeStrings[kNoisyIrNodeTypeMax];
+extern char * gNewtonAstNodeStrings[kNoisyIrNodeTypeMax];
 
 static State *
 processNewtonFileDimensionPass(char * filename);
 
-
 void
-processNewtonFile(State *  N, char *  filename)
+processNewtonFile(State * N, char * filename)
 {
 	TimeStampTraceMacro(kNewtonTimeStampKey);
 
@@ -112,12 +111,12 @@ processNewtonFile(State *  N, char *  filename)
 	 */
 	N->newtonIrTopScope = commonSymbolTableAllocScope(N);
 
-	State *	N_dim = processNewtonFileDimensionPass(filename);
+	State * N_dim			    = processNewtonFileDimensionPass(filename);
 	N->newtonIrTopScope->firstDimension = N_dim->newtonIrTopScope->firstDimension;
 
 	if (N->newtonIrTopScope->firstDimension == NULL)
 	{
-		char *	details;
+		char * details;
 
 		asprintf(&details, "%s\n", EnoValidDimensions);
 		newtonParserSemanticError(N, kNewtonIrNodeType_PnewtonDescription, details);
@@ -131,7 +130,7 @@ processNewtonFile(State *  N, char *  filename)
 	if (!(N->irPasses & kNewtonIrPassSensorsDisable))
 	{
 		irPassSensors(N);
-	}	
+	}
 
 	if (N->irPasses & kNewtonIrPassDimensionalMatrixAnnotation)
 	{
@@ -204,10 +203,12 @@ processNewtonFile(State *  N, char *  filename)
 	}
 	if (N->irPasses & kNewtonirPassLLVMIROptimizeByRange)
 	{
-        bool enableQuantization = N->irPasses & kNewtonirPassLLVMIRAutoQuantization;
-        bool enableOverload = N->irPasses & kNewtonirPassLLVMIREnableOverload;
-        bool enableBuiltinAssume = N->irPasses & kNewtonirPassLLVMIREnableBuiltinAssume;
-		irPassLLVMIROptimizeByRange(N, enableQuantization, enableOverload, enableBuiltinAssume);
+		bool enableQuantization	 = N->irPasses & kNewtonirPassLLVMIRAutoQuantization;
+		bool enableOverload	 = N->irPasses & kNewtonirPassLLVMIREnableOverload;
+		bool enableBuiltinAssume = N->irPasses & kNewtonirPassLLVMIREnableBuiltinAssume;
+		bool enableQuantDecider	 = N->irPasses & kNewtonirPassLLVMIRQuantDeciderEnabled;
+		irPassLLVMIROptimizeByRange(N, enableQuantization, enableOverload,
+					    enableBuiltinAssume, enableQuantDecider);
 	}
 	/*
 	 *	Dot backend.
@@ -215,7 +216,7 @@ processNewtonFile(State *  N, char *  filename)
 	if (N->irBackends & kNewtonIrBackendDot)
 	{
 		fprintf(stdout, "%s\n", irPassDotBackend(N, N->newtonIrTopScope, N->newtonIrRoot, gNewtonAstNodeStrings));
- 	}
+	}
 
 	/*
 	 *	Smt backend
@@ -256,14 +257,12 @@ processNewtonFile(State *  N, char *  filename)
 
 	if (N->mode & kCommonModeCallStatistics)
 	{
-		uint64_t	irNodeCount = 0, symbolTableNodeCount = 0;
-
+		uint64_t irNodeCount = 0, symbolTableNodeCount = 0;
 
 		timeStampDumpResidencies(N);
 
-		irNodeCount = irPassHelperIrSize(N, N->newtonIrRoot);
+		irNodeCount	     = irPassHelperIrSize(N, N->newtonIrRoot);
 		symbolTableNodeCount = irPassHelperSymbolTableSize(N, N->newtonIrTopScope);
-
 
 		flexprint(N->Fe, N->Fm, N->Fpinfo, "Intermediate Representation Information:\n\n");
 		flexprint(N->Fe, N->Fm, N->Fpinfo, "    IR node count                        : %llu\n", irNodeCount);
@@ -311,11 +310,10 @@ processNewtonFile(State *  N, char *  filename)
 	}
 }
 
-static State*
+static State *
 processNewtonFileDimensionPass(char * filename)
 {
-	State *		N = init(kCommonModeDefault);
-	
+	State * N = init(kCommonModeDefault);
 
 	/*
 	 *	In this case, put macro here since it needs 'N'
