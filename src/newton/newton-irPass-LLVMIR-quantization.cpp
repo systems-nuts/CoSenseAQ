@@ -160,6 +160,8 @@ createFixRsqrt(llvm::Module * irModule, llvm::Type * quantizedType, std::vector<
 		}
 	}
 
+
+
 	// Define the function type: int16_t/int32_t fixrsqrt(int16_t/int32_t x)
 	llvm::FunctionType * funcType = llvm::FunctionType::get(quantizedType, {quantizedType}, false);
 	llvm::Function *     func     = llvm::Function::Create(funcType, llvm::Function::PrivateLinkage, fixrsqrtFuncName, irModule);
@@ -1867,6 +1869,7 @@ performFixedPointSqrt(IRBuilder<> & builder, Module * irModule, Value * fixedPoi
 void
 handleSqrtCall(CallInst * llvmIrCallInstruction, Type * quantizedType)
 {
+
 	IRBuilder<> Builder(llvmIrCallInstruction);
 	auto	    operand = llvmIrCallInstruction->getOperand(0);
 
