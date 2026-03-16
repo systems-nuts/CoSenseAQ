@@ -32,35 +32,23 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "newton-irPass-LLVMIR-rangeAnalysis.h"
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif /* __cplusplus */
-extern std::vector<llvm::Function*> functionsToErase;
-extern std::vector<llvm::GlobalVariable*> globalsToErase;
-//extern std::vector<llvm::Instruction*> instructionsToErase;
+extern std::vector<llvm::Function *>	   functionsToErase;
+extern std::vector<llvm::GlobalVariable *> globalsToErase;
+// extern std::vector<llvm::Instruction*> instructionsToErase;
 
 void
-irPassLLVMIRAutoQuantization(State * N, llvm::Function & llvmIrFunction,  std::vector<llvm::Function*>& functionsToInsert,int maxPrecisionBits);
+irPassLLVMIRAutoQuantization(State * N, llvm::Function & llvmIrFunction, std::vector<llvm::Function *> & functionsToInsert, int maxPrecisionBits);
 
-//void
-//irPassLLVMIRAutoQuantization(State *N, llvm::Function &llvmIrFunction, std::vector<llvm::Function *> &functionsToInsert,
-//                             std::map<llvm::Value *, std::vector<std::pair<double, double>>> &virtualRegisterVectorRange,
-//                             int maxPrecisionBits);
-
-//void irPassLLVMIRAutoQuantization(State *N, Function &F, std::vector<Function *> &functionsToInsert,
-//                                  int maxPrecisionBits, std::map<Value *, std::vector<std::pair<double, double>>> &virtualRegisterVectorRange,
-//                                  int bitWidth, bool enableVectorization, bool enableRangeAnalysis);
-
-
-
-
-
-
+void
+irPassLLVMIRApplyDequantization(llvm::Module & module, int maxPrecisionBits);
 
 
 extern
-//void eraseOldFunctions();
-    void eraseOldFunctions(llvm::Module &M);
+    // void eraseOldFunctions();
+    void
+     eraseOldFunctions(llvm::Module & M);
 void eraseOldInstructions();
 void eraseOldGlobals();
 #ifdef __cplusplus

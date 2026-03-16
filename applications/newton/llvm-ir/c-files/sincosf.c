@@ -36,6 +36,40 @@
 */
 typedef double bmx055xAcceleration;
 
+/*
+ * Horner polynomial evaluation for sin(x) and cos(x):
+ *   cos(x) ≈ c0 + x²(c1 + x²(c2 + x²(c3 + x²*c4)))
+ *   sin(x) ≈ x(1 + x²(s1 + x²(s2 + x²*s3)))
+ * Extracted for quantization pass identification.
+ * Input x in [-π/4, π/4], x2 = x*x
+ */
+static void __attribute__((noinline))
+__sincosf_poly_horner(double x, double x2, const sincos_t *p, int n,
+                      float *sinp, float *cosp)
+{
+    double x3, x4, x5, x6, s, c, c1, c2, s1;
+
+    x4 = x2 * x2;
+    x3 = x2 * x;
+    c2 = p->c3 + x2 * p->c4;
+    s1 = p->s2 + x2 * p->s3;
+
+    /* Swap sin/cos result based on quadrant.  */
+    float *tmp = (n & 1 ? cosp : sinp);
+    cosp = (n & 1 ? sinp : cosp);
+    sinp = tmp;
+
+    c1 = p->c0 + x2 * p->c1;
+    x5 = x3 * x2;
+    x6 = x4 * x2;
+
+    s = x + x3 * p->s1;
+    c = c1 + x4 * p->c2;
+
+    *sinp = s + x5 * s1;
+    *cosp = c + x6 * c2;
+}
+
 /* Fast sincosf implementation.  Worst-case ULP is 0.5607, maximum relative
    error is 0.5303 * 2^-23.  A single-step range reduction is used for
    small values.  Large inputs have their range reduced using fast integer
@@ -65,7 +99,7 @@ libc_sincosf (bmx055xAcceleration y, float *sinp, float *cosp)
             return;
         }
 
-        sincosf_poly (x, x2, p, 0, sinp, cosp);
+        __sincosf_poly_horner (x, x2, p, 0, sinp, cosp);
     }
     // [0, 5]                  [6, 10]
     else if (abstop12 (y) < abstop12 (120.0f))
@@ -78,7 +112,7 @@ libc_sincosf (bmx055xAcceleration y, float *sinp, float *cosp)
         if (n & 2)
             p = &__sincosf_table[1];
 
-        sincosf_poly (x * s, x * x, p, n, sinp, cosp);
+        __sincosf_poly_horner (x * s, x * x, p, n, sinp, cosp);
     }
     else if (likely (abstop12 (y) < abstop12 (INFINITY)))
     {
@@ -93,7 +127,7 @@ libc_sincosf (bmx055xAcceleration y, float *sinp, float *cosp)
         if ((n + sign) & 2)
             p = &__sincosf_table[1];
 
-        sincosf_poly (x * s, x * x, p, n, sinp, cosp);
+        __sincosf_poly_horner (x * s, x * x, p, n, sinp, cosp);
     }
     else
     {

@@ -51,7 +51,7 @@ test_case_num = 10
 merit_num = 4
 
 average_data = []
-with open('average_speedup.log', 'r') as f:
+with open('average_speedup_woquant.log.log', 'r') as f:
     for line in f.readlines():
         line_list = line.strip('\n').split('\t')
         average_data.append(line_list)
@@ -78,7 +78,7 @@ for i in range(0, len(average_name_list)):
           "times, lib size reduce: ", format(average_libsize_reduce[i], '.2f'), "%")
 
 performance_data = []
-with open('perf.log', 'r') as f:
+with open('perf_woquant.log', 'r') as f:
     for line in f.readlines():
         line_list = line.strip('\n').split('\t')
         performance_data.append(line_list)
@@ -153,7 +153,7 @@ lib_size_reduction = np.reshape(lib_size_reduction, (test_case_num, 1, params_nu
 
 perf_data_speedup = [inst_speedup, time_speedup, ir_reduction, lib_size_reduction]
 
-y_labels = ["instruction counts (million)", "time consumption speedup", "IR lines", "library size reduction ratio"]
+y_labels = ["instruction counts (million)", "time consumption speedup", "IR lines", "library size reduction ratio","compile time"]
 
 machine = platform.machine()
 # machine = "aarch64"
@@ -193,5 +193,5 @@ for merit_id in range(1, merit_num, 2):
 
 plt.close()
 
-os.system('cp perf.log ' + machine + "_perf.log")
-os.system('cp average_speedup.log ' + machine + "_average_speedup.log")
+os.system('cp perf_woquant.log ' + machine + "_perf_woquant.log")
+os.system('cp average_speedup_woquant.log ' + machine + "_average_speedup_woquant.log")

@@ -35,24 +35,31 @@ using namespace llvm;
 
 extern "C" {
 
-static bool isFromQuantizedGlobal(Value *V) {
-	if (auto *loadInst = dyn_cast<LoadInst>(V)) {
-		if (auto *gv = dyn_cast<GlobalVariable>(loadInst->getPointerOperand())) {
-			if (gv->getName().contains("_quantized")) {
+static bool
+isFromQuantizedGlobal(Value * V)
+{
+	if (auto * loadInst = dyn_cast<LoadInst>(V))
+	{
+		if (auto * gv = dyn_cast<GlobalVariable>(loadInst->getPointerOperand()))
+		{
+			if (gv->getName().contains("_quantized"))
+			{
 				return true;
 			}
 		}
 	}
-	if (auto *inst = dyn_cast<Instruction>(V)) {
-		for (auto &op : inst->operands()) {
-			if (isFromQuantizedGlobal(op)) {
+	if (auto * inst = dyn_cast<Instruction>(V))
+	{
+		for (auto & op : inst->operands())
+		{
+			if (isFromQuantizedGlobal(op))
+			{
 				return true;
 			}
 		}
 	}
 	return false;
 }
-
 
 /*
  * Steps of constantSubstitution:
@@ -133,17 +140,18 @@ constantSubstitution(State * N, BoundInfo * boundInfo, llvm::Function & llvmIrFu
 					 *   store double 0.000000e+00, double* %12, align 8, !dbg !595
 					 *   ...
 					 * */
-					if (isa<GetElementPtrInst>(llvmIrInstruction) && isa<Argument>(llvmIrInstruction->getOperand(0))) {
-                        break;
-                    }
+					if (isa<GetElementPtrInst>(llvmIrInstruction) && isa<Argument>(llvmIrInstruction->getOperand(0)))
+					{
+						break;
+					}
 
-                    /*
-                     * if it's a pointer, skip it
-                     * */
-                    if (llvmIrInstruction->getType()->isPointerTy())
-                    {
-                        break;
-                    }
+					/*
+					 * if it's a pointer, skip it
+					 * */
+					if (llvmIrInstruction->getType()->isPointerTy())
+					{
+						break;
+					}
 
 					auto lowerBound = vrIt->second.first;
 					auto upperBound = vrIt->second.second;
@@ -152,7 +160,8 @@ constantSubstitution(State * N, BoundInfo * boundInfo, llvm::Function & llvmIrFu
 					 * */
 					if (fabs(lowerBound - upperBound) < DBL_EPSILON)
 					{
-						if (isFromQuantizedGlobal(llvmIrInstruction)) {
+						if (isFromQuantizedGlobal(llvmIrInstruction))
+						{
 							break;
 						}
 
@@ -183,7 +192,7 @@ constantSubstitution(State * N, BoundInfo * boundInfo, llvm::Function & llvmIrFu
 						if (newConstant != nullptr)
 						{
 							llvmIrInstruction->replaceAllUsesWith(newConstant);
-							llvmIrInstruction->removeFromParent();
+							llvmIrInstruction->eraseFromParent();
 						}
 					}
 				}
@@ -196,7 +205,7 @@ constantSubstitution(State * N, BoundInfo * boundInfo, llvm::Function & llvmIrFu
 						 * store double 0.000000e+00, double 0.000000e+00, align 8
 						 * */
 						if (isa<llvm::Constant>(llvmIrStoreInstruction->getPointerOperand()))
-							llvmIrStoreInstruction->removeFromParent();
+							llvmIrStoreInstruction->eraseFromParent();
 					}
 					break;
 				case Instruction::ICmp:

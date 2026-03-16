@@ -98,7 +98,6 @@ void sensfusion6UpdateQImpl(float gx, float gy, float gz, float ax, float ay, fl
 		_8qx = 8.0f * qx;
 		_8qy = 8.0f * qy;
 		qwqw = qw * qw;
-		qwqw = qw * qw;
 		qxqx = qx * qx;
 		qyqy = qy * qy;
 		qzqz = qz * qz;
