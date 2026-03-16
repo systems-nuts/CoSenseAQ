@@ -121,6 +121,7 @@ SOURCES		=\
 		newton-irPass-LLVMIR-quantization.cpp\
 		newton-irPass-LLVMIR-memoryAlignment.cpp\
 		newton-irPass-LLVMIR-emitAssume.cpp\
+		newton-irPass-LLVMIR-quantDecider.cpp\
 
 
 #
@@ -157,6 +158,7 @@ OBJS		=\
 		newton-irPass-LLVMIR-shrinkTypeByRange.$(OBJECTEXTENSION)\
 		newton-irPass-LLVMIR-quantization.$(OBJECTEXTENSION)\
 		newton-irPass-LLVMIR-emitAssume.$(OBJECTEXTENSION)\
+		newton-irPass-LLVMIR-quantDecider.$(OBJECTEXTENSION)\
 		newton-irPass-invariantSignalAnnotation.$(OBJECTEXTENSION)\
 		newton-irPass-piGroupsSignalAnnotation.$(OBJECTEXTENSION)\
 		newton-irPass-ipsaBackend.$(OBJECTEXTENSION)\
@@ -206,6 +208,7 @@ CGIOBJS		=\
 		newton-irPass-LLVMIR-shrinkTypeByRange.$(OBJECTEXTENSION)\
 		newton-irPass-LLVMIR-quantization.$(OBJECTEXTENSION)\
 		newton-irPass-LLVMIR-emitAssume.$(OBJECTEXTENSION)\
+		newton-irPass-LLVMIR-quantDecider.$(OBJECTEXTENSION)\
 		newton-irPass-invariantSignalAnnotation.$(OBJECTEXTENSION)\
 		newton-irPass-piGroupsSignalAnnotation.$(OBJECTEXTENSION)\
 		newton-irPass-estimatorSynthesisBackend/$(OBJECTEXTENSION)\
@@ -254,6 +257,7 @@ LIBNEWTONOBJS =\
 		newton-irPass-LLVMIR-shrinkTypeByRange.$(OBJECTEXTENSION)\
 		newton-irPass-LLVMIR-quantization.$(OBJECTEXTENSION)\
 		newton-irPass-LLVMIR-emitAssume.$(OBJECTEXTENSION)\
+		newton-irPass-LLVMIR-quantDecider.$(OBJECTEXTENSION)\
 		newton-irPass-invariantSignalAnnotation.$(OBJECTEXTENSION)\
 		newton-irPass-piGroupsSignalAnnotation.$(OBJECTEXTENSION)\
 		newton-irPass-ipsaBackend.$(OBJECTEXTENSION)\
@@ -293,6 +297,7 @@ HEADERS		=\
 		newton-irPass-LLVMIR-dimension-check.h\
 		newton-irPass-LLVMIR-livenessAnalysis.h\
 		newton-irPass-LLVMIR-optimizeByRange.h\
+		newton-irPass-LLVMIR-quantDecider.h\
 		newton-irPass-invariantSignalAnnotation.h\
 		newton-irPass-piGroupsSignalAnnotation.h\
 		newton-irPass-ipsaBackend.h\
@@ -400,6 +405,10 @@ newton-irPass-LLVMIR-memoryAlignment.$(OBJECTEXTENSION): newton-irPass-LLVMIR-me
 
 
 newton-irPass-LLVMIR-emitAssume.$(OBJECTEXTENSION): newton-irPass-LLVMIR-emitAssume.cpp
+	$(CXX) $(FLEXFLAGS) $(INCDIRS) $(CXXFLAGS) $(WFLAGS) $(OPTFLAGS) $(LINTFLAGS) $<
+	$(CXX) $(FLEXFLAGS) $(INCDIRS) $(CXXFLAGS) $(WFLAGS) $(OPTFLAGS) $<
+
+newton-irPass-LLVMIR-quantDecider.$(OBJECTEXTENSION): newton-irPass-LLVMIR-quantDecider.cpp maxprec.cfg
 	$(CXX) $(FLEXFLAGS) $(INCDIRS) $(CXXFLAGS) $(WFLAGS) $(OPTFLAGS) $(LINTFLAGS) $<
 	$(CXX) $(FLEXFLAGS) $(INCDIRS) $(CXXFLAGS) $(WFLAGS) $(OPTFLAGS) $<
 

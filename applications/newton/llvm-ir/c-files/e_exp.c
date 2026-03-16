@@ -102,6 +102,13 @@ P5   =  4.13813679705723846039e-08; /* 0x3E663769, 0x72BEA4D0 */
 */
 typedef double bmx055xAcceleration;
 
+static double __attribute__((noinline))
+__exp_horner_poly(double x)
+{
+    double t = x * x;
+    return x - t*(P1+t*(P2+t*(P3+t*(P4+t*P5))));
+}
+
 #ifdef __STDC__
 double __ieee754_exp(bmx055xAcceleration x)	/* default IEEE double exp */
 #else
@@ -149,8 +156,7 @@ double __ieee754_exp(x)	/* default IEEE double exp */
     else k = 0;
 
     /* x is now in primary range */
-    t  = x*x;
-    c  = x - t*(P1+t*(P2+t*(P3+t*(P4+t*P5))));
+    c  = __exp_horner_poly(x);
     if(k==0) 	return one-((x*c)/(c-2.0)-x);
     else 		y = one-((lo-(x*c)/(2.0-c))-hi);
     if(k >= -1021) {

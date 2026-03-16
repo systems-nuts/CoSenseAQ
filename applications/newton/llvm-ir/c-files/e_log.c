@@ -87,6 +87,16 @@ static double zero   =  0.0;
 */
 typedef double bmx055xAcceleration;
 
+static double __attribute__((noinline))
+__log_horner_poly(double s)
+{
+    double z  = s * s;
+    double w  = z * z;
+    double t1 = w*(Lg2+w*(Lg4+w*Lg6));
+    double t2 = z*(Lg1+w*(Lg3+w*(Lg5+w*Lg7)));
+    return t2 + t1;
+}
+
 #ifdef __STDC__
 double __ieee754_log(bmx055xAcceleration x)
 #else
@@ -125,14 +135,10 @@ double __ieee754_log(x)
     }
     s = f/(2.0+f);
     dk = (double)k;
-    z = s*s;
     i = hx-0x6147a;
-    w = z*z;
     j = 0x6b851-hx;
-    t1= w*(Lg2+w*(Lg4+w*Lg6));
-    t2= z*(Lg1+w*(Lg3+w*(Lg5+w*Lg7)));
     i |= j;
-    R = t2+t1;
+    R = __log_horner_poly(s);
     if(i>0) {
         hfsq=0.5*f*f;
         if(k==0) return f-(hfsq-s*(hfsq+R)); else

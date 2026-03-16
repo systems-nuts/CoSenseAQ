@@ -39,23 +39,19 @@
 
 #include <llvm-c/Core.h>
 
-typedef enum
-{
-	kCommonVerbosityDebugLexer	=	(1 << 0),
-	kCommonVerbosityDebugParser	=	(1 << 1),
-	kCommonVerbosityDebugAST	=	(1 << 2),
-	kCommonVerbosityDebugFF		=	(1 << 3),
-	
+typedef enum {
+	kCommonVerbosityDebugLexer  = (1 << 0),
+	kCommonVerbosityDebugParser = (1 << 1),
+	kCommonVerbosityDebugAST    = (1 << 2),
+	kCommonVerbosityDebugFF	    = (1 << 3),
+
 	/*
 	 *	Code depends on this bringing up the rear.
-	 */	
+	 */
 	kCommonVerbosityDebugMax,
 } VerbosityType;
 
-
-
-typedef enum
-{
+typedef enum {
 	/*
 	 *	Noisy Tokens
 	 */
@@ -254,7 +250,6 @@ typedef enum
 	kNoisyIrNodeType_Txor,
 	kNoisyIrNodeType_TxorAssign,
 
-
 	/*
 	 *	Code depends on this bringing up the rear for Noisy tokens.
 	 */
@@ -269,9 +264,6 @@ typedef enum
 	 */
 	kNoisyIrNodeType_Zepsilon,
 	kNoisyIrNodeType_Zeof,
-
-
-
 
 	/*
 	 *	Noisy grammar productions.
@@ -434,11 +426,10 @@ typedef enum
 	 */
 	kNoisyIrNodeTypeMax,
 
-
 	/*
 	 *	Newton tokens
 	 */
-	kNewtonIrNodeType_TMin,	
+	kNewtonIrNodeType_TMin,
 	/*
 	 *	From auto-generated sets:
 	 */
@@ -587,8 +578,6 @@ typedef enum
 	 */
 	kNewtonIrNodeType_TMax,
 
-
-
 	/*
 	 *	Newton grammar productions
 	 */
@@ -671,7 +660,6 @@ typedef enum
 	 */
 	kNewtonIrNodeType_PMax,
 
-
 	/*
 	 *	Code depends on this bringing up the rear for Newton.
 	 */
@@ -683,15 +671,12 @@ typedef enum
 	kCommonIrNodeTypeMax
 } IrNodeType;
 
-
-
-typedef enum
-{
-	kCommonVerbosityVerbose				= (1 << 0),
-	kCommonVerbosityActionTrace			= (1 << 1),
-	kCommonVerbosityCallTrace			= (1 << 2),
-	kCommonVerbosityPostScanStreamCheck		= (1 << 3),
-	kCommonVerbosityPreScanStreamCheck		= (1 << 4),
+typedef enum {
+	kCommonVerbosityVerbose		    = (1 << 0),
+	kCommonVerbosityActionTrace	    = (1 << 1),
+	kCommonVerbosityCallTrace	    = (1 << 2),
+	kCommonVerbosityPostScanStreamCheck = (1 << 3),
+	kCommonVerbosityPreScanStreamCheck  = (1 << 4),
 
 	/*
 	 *	Code depends on this bringing up the rear.
@@ -699,78 +684,68 @@ typedef enum
 	kCommonVerbosityMax,
 } CommonVerbosity;
 
-
-
-typedef enum
-{
+typedef enum {
 	kNewtonIrPassDimensionalMatrixAnnotation		= (1 << 0),
 	kNewtonIrPassDimensionalMatrixPiGroups			= (1 << 1),
-	kNewtonIrPassDimensionalMatrixKernelRowCanonicalization	= (1 << 2),
+	kNewtonIrPassDimensionalMatrixKernelRowCanonicalization = (1 << 2),
 	kNewtonIrPassDimensionalMatrixPiGroupSorted		= (1 << 3),
-	kNewtonIrPassDimensionalMatrixPiGroupsWeedOutDuplicates	= (1 << 4),
+	kNewtonIrPassDimensionalMatrixPiGroupsWeedOutDuplicates = (1 << 4),
 	kNewtonIrPassDimensionalMatrixKernelPrinter		= (1 << 5),
 	kNewtonIrPassDimensionalMatrixConvertToList		= (1 << 6),
-	kNewtonIrPassDimensionalMatrixAnnotationByBody          = (1 << 7),
+	kNewtonIrPassDimensionalMatrixAnnotationByBody		= (1 << 7),
 	kNewtonIrPassDimensionalMatrixKernelPrinterFromBody	= (1 << 8),
 	KNewtonIrPassDimensionalMatrixConstantPi		= (1 << 9),
 	kNewtonIrPassInvariantSignalAnnotation			= (1 << 10),
 
-	kNewtonIrPassPiGroupsSignalAnnotation			= (1 << 11),
-	kNewtonIrPassLLVMIRDimensionCheck								= (1 << 12),
-	kNewtonIrPassSensorsDisable				= (1 << 13),
-	kNewtonIrPassLLVMIRLivenessAnalysis				= (1 << 14),
-	kNewtonirPassLLVMIROptimizeByRange				= (1 << 15),
-    kNewtonirPassLLVMIRAutoQuantization 			= (1 << 16),
-    kNewtonirPassLLVMIREnableOverload               = (1 << 17),
-    kNewtonirPassLLVMIREnableBuiltinAssume          = (1 << 18),
+	kNewtonIrPassPiGroupsSignalAnnotation  = (1 << 11),
+	kNewtonIrPassLLVMIRDimensionCheck      = (1 << 12),
+	kNewtonIrPassSensorsDisable	       = (1 << 13),
+	kNewtonIrPassLLVMIRLivenessAnalysis    = (1 << 14),
+	kNewtonirPassLLVMIROptimizeByRange     = (1 << 15),
+	kNewtonirPassLLVMIRAutoQuantization    = (1 << 16),
+	kNewtonirPassLLVMIREnableOverload      = (1 << 17),
+	kNewtonirPassLLVMIREnableBuiltinAssume = (1 << 18),
+	kNewtonirPassLLVMIRQuantDeciderEnabled = (1 << 19),
 	/*
 	 *	Code depends on this bringing up the rear.
 	 */
 	kNewtonIrPassMax,
 } NewtonIrPasses;
 
-
-
-typedef enum
-{
+typedef enum {
 	/*
 	 *	Code depends on this bringing up the rear.
 	 */
 	kNoisyIrPassMax,
 } NoisyIrPasses;
 
-
-
-typedef enum
-{
-	kNewtonIrBackendDot				= (1 << 0),
-	kNewtonIrBackendProtobuf			= (1 << 1),
-	kNewtonIrBackendSmt				= (1 << 2),
-	kNewtonIrBackendC				= (1 << 3),
-	kNewtonIrBackendRTL				= (1 << 4),
-	kNewtonIrBackendTargetParam		= (1 << 5),
+typedef enum {
+	kNewtonIrBackendDot	    = (1 << 0),
+	kNewtonIrBackendProtobuf    = (1 << 1),
+	kNewtonIrBackendSmt	    = (1 << 2),
+	kNewtonIrBackendC	    = (1 << 3),
+	kNewtonIrBackendRTL	    = (1 << 4),
+	kNewtonIrBackendTargetParam = (1 << 5),
 
 	/*
 	 *	The LaTeX backend isn't a true backend per se, but rather
 	 *	the flag enables dumping the LaTeX / KaTeX when the kernel
 	 *	dumping is happening.
 	 */
-	kNewtonIrBackendLatex				= (1 << 6),
-	kNewtonIrBackendEstimatorSynthesis	= (1 << 7),
-	kNewtonIrBackendIpsa				= (1 << 8),
+	kNewtonIrBackendLatex		   = (1 << 6),
+	kNewtonIrBackendEstimatorSynthesis = (1 << 7),
+	kNewtonIrBackendIpsa		   = (1 << 8),
 
-	kNewtonIrBackendSignalTypedefHeader	= (1 << 9),
+	kNewtonIrBackendSignalTypedefHeader = (1 << 9),
 	/*
 	 *	Code depends on this bringing up the rear.
 	 */
 	kNewtonIrBackendMax,
 } NewtonIrBackends;
 
-
-typedef enum
-{
-	kNoisyIrBackendDot				= (1 << 0),
-	kNoisyIrBackendProtobuf				= (1 << 1),
+typedef enum {
+	kNoisyIrBackendDot	= (1 << 0),
+	kNoisyIrBackendProtobuf = (1 << 1),
 
 	/*
 	 *	Code depends on this bringing up the rear.
@@ -778,24 +753,20 @@ typedef enum
 	kNoisyIrBackendMax,
 } NoisyIrBackends;
 
-typedef enum
-{
-	kCommonDotDetailLevelNoText			= (1 << 0),
-	kCommonDotDetailLevelNoNilNodes			= (1 << 1),
-	
+typedef enum {
+	kCommonDotDetailLevelNoText	= (1 << 0),
+	kCommonDotDetailLevelNoNilNodes = (1 << 1),
+
 	/*
 	 *	Code depends on this bringing up the rear.
 	 */
 	kCommonDotDetailLevelMax,
 } DetailLevel;
 
-
-
-typedef enum
-{
-	kCommonIrNodeColorDotBackendColoring		= (1 << 0),
-	kCommonIrNodeColorProtobufBackendColoring	= (1 << 1),
-	kCommonIrNodeColorTreeTransformedColoring	= (1 << 2),
+typedef enum {
+	kCommonIrNodeColorDotBackendColoring	  = (1 << 0),
+	kCommonIrNodeColorProtobufBackendColoring = (1 << 1),
+	kCommonIrNodeColorTreeTransformedColoring = (1 << 2),
 
 	/*
 	 *	Code depends on this bringing up the rear.
@@ -803,22 +774,19 @@ typedef enum
 	kCommonIrNodeColor,
 } IrNodeColor;
 
-
-
-typedef enum
-{
-	kCommonMaxBufferLength				= 65536,
-	kCommonChunkBufferLength			= 8192,
-	kCommonMaxErrorTokenCount			= 32,
-	kCommonStreamchkWidth				= 32,
-	kCommonMaxPrintBufferLength			= 8192,
-	kCommonMaxTokenCharacters			= 32,
-	kCommonMaxFilenameLength			= 128,
-	kCommonTimestampTimelineLength			= 4000000 /* Set to, e.g., 4000000 if we want to capture very long traces for debug; set to 1 otherwise */,
-	kCommonCgiRandomDigits				= 10,
-	kCommonRlimitCpuSeconds				= 5*60,			/*	5 mins	*/
-	kCommonRlimitRssBytes				= 2*1024*1024*1024UL,	/*	2GB	*/
-	kCommonProgressTimerSeconds			= 5,
+typedef enum {
+	kCommonMaxBufferLength	       = 65536,
+	kCommonChunkBufferLength       = 8192,
+	kCommonMaxErrorTokenCount      = 32,
+	kCommonStreamchkWidth	       = 32,
+	kCommonMaxPrintBufferLength    = 8192,
+	kCommonMaxTokenCharacters      = 32,
+	kCommonMaxFilenameLength       = 128,
+	kCommonTimestampTimelineLength = 4000000 /* Set to, e.g., 4000000 if we want to capture very long traces for debug; set to 1 otherwise */,
+	kCommonCgiRandomDigits	       = 10,
+	kCommonRlimitCpuSeconds	       = 5 * 60,		   /*	5 mins	*/
+	kCommonRlimitRssBytes	       = 2 * 1024 * 1024 * 1024UL, /*	2GB	*/
+	kCommonProgressTimerSeconds    = 5,
 
 	/*
 	 *	Code depends on this bringing up the rear.
@@ -826,14 +794,11 @@ typedef enum
 	kCommonConstantMax,
 } Constant;
 
-
-
-typedef enum
-{
-	kCommonModeDefault				= (0 << 0),
-	kCommonModeCallTracing				= (1 << 0),
-	kCommonModeCallStatistics			= (1 << 1),
-	kCommonModeCGI					= (1 << 2),
+typedef enum {
+	kCommonModeDefault	  = (0 << 0),
+	kCommonModeCallTracing	  = (1 << 0),
+	kCommonModeCallStatistics = (1 << 1),
+	kCommonModeCGI		  = (1 << 2),
 
 	/*
 	 *	Code depends on this bringing up the rear.
@@ -841,11 +806,8 @@ typedef enum
 	kCommonModeMax
 } CommonMode;
 
-
-
-typedef enum
-{
-	kCommonPostFileWriteActionRenderDot		= (1 << 0),
+typedef enum {
+	kCommonPostFileWriteActionRenderDot = (1 << 0),
 
 	/*
 	 *	Code depends on this bringing up the rear.
@@ -853,142 +815,130 @@ typedef enum
 	kCommonPostFileWriteActionMax,
 } PostFileWriteAction;
 
-typedef enum
-{
-        noisyBasicTypeInit,
-        noisyBasicTypeBool,
-        noisyBasicTypeInt4,
-        noisyBasicTypeInt8,
-        noisyBasicTypeInt16,
-        noisyBasicTypeInt32,
-        noisyBasicTypeInt64,
-        noisyBasicTypeInt128,
-        noisyBasicTypeNat4,
-        noisyBasicTypeNat8,
-        noisyBasicTypeNat16,
-        noisyBasicTypeNat32,
-        noisyBasicTypeNat64,
-        noisyBasicTypeNat128,
-        noisyBasicTypeIntegerConstType,
-        noisyBasicTypeFloat16,
-        noisyBasicTypeFloat32,
-        noisyBasicTypeFloat64,
-        noisyBasicTypeFloat128,
-        noisyBasicTypeRealConstType,
-        noisyBasicTypeArithType,
-        noisyBasicTypeString,
-        noisyBasicTypeArrayType,
-        noisyBasicTypeNilType,
+typedef enum {
+	noisyBasicTypeInit,
+	noisyBasicTypeBool,
+	noisyBasicTypeInt4,
+	noisyBasicTypeInt8,
+	noisyBasicTypeInt16,
+	noisyBasicTypeInt32,
+	noisyBasicTypeInt64,
+	noisyBasicTypeInt128,
+	noisyBasicTypeNat4,
+	noisyBasicTypeNat8,
+	noisyBasicTypeNat16,
+	noisyBasicTypeNat32,
+	noisyBasicTypeNat64,
+	noisyBasicTypeNat128,
+	noisyBasicTypeIntegerConstType,
+	noisyBasicTypeFloat16,
+	noisyBasicTypeFloat32,
+	noisyBasicTypeFloat64,
+	noisyBasicTypeFloat128,
+	noisyBasicTypeRealConstType,
+	noisyBasicTypeArithType,
+	noisyBasicTypeString,
+	noisyBasicTypeArrayType,
+	noisyBasicTypeNilType,
 	noisyBasicTypeNamegenType,
-        noisyBasicTypeErrorType
+	noisyBasicTypeErrorType
 } NoisyBasicType;
 
+typedef struct Scope	    Scope;
+typedef struct Symbol	    Symbol;
+typedef struct Token	    Token;
+typedef struct IrNode	    IrNode;
+typedef struct SourceInfo   SourceInfo;
+typedef struct Dimension    Dimension;
+typedef struct Physics	    Physics;
+typedef struct IntegralList IntegralList;
+typedef struct Invariant    Invariant;
+typedef struct Signal	    Signal;
+typedef struct Sensor	    Sensor;
+typedef struct Modality	    Modality;
 
+typedef struct NoisyType NoisyType;
 
-typedef struct Scope		Scope;
-typedef struct Symbol		Symbol;
-typedef struct Token		Token;
-typedef struct IrNode		IrNode;
-typedef struct SourceInfo	SourceInfo;
-typedef struct Dimension	Dimension;
-typedef struct Physics		Physics;
-typedef struct IntegralList	IntegralList;
-typedef struct Invariant	Invariant;
-typedef struct Signal		Signal;
-typedef struct Sensor		Sensor;
-typedef struct Modality		Modality;
-
-
-typedef struct NoisyType	NoisyType;
-
-enum
-{
+enum {
 	kNoisyStaticArrayMaxNumberOfDimensions = 128
 };
 
-struct NoisyType
-{
-        NoisyBasicType basicType;
-        int dimensions;
-        NoisyBasicType arrayType;
-	Symbol * functionDefinition;
-        int sizeOfDimension[kNoisyStaticArrayMaxNumberOfDimensions];
+struct NoisyType {
+	NoisyBasicType basicType;
+	int	       dimensions;
+	NoisyBasicType arrayType;
+	Symbol *       functionDefinition;
+	int	       sizeOfDimension[kNoisyStaticArrayMaxNumberOfDimensions];
 };
 
+struct Dimension {
+	char *	     name;
+	char *	     abbreviation;
+	double	     exponent;	//	Default value is 1 if exists
+	Scope *	     scope;
+	SourceInfo * sourceInfo;
+	int	     primeNumber;
 
-
-
-struct Dimension
-{
-	char *			name;
-	char *			abbreviation;
-	double			exponent;			//	Default value is 1 if exists
-	Scope *			scope;
-	SourceInfo *		sourceInfo;
-	int			primeNumber;
-
-	Dimension *		next;
+	Dimension * next;
 };
 
-struct Invariant
-{
-	char *			identifier;			//	Name of the physics quantity, of type Tidentifier
-	Scope *			scope;
-	SourceInfo *		sourceInfo;
-	IrNode *		parameterList;			//	This is just bunch of IrNode's in Xseq
-	uint64_t		id;
-	IrNode *		constraints;
-	double * 		dimensionalMatrix;		//	Dimensional matrix
-	int 			dimensionalMatrixRowCount;	//	Number of dimensional matrix rows		
-	int 			dimensionalMatrixColumnCount;	//	Number of dimensional matrix columns 
-	char **			dimensionalMatrixRowLabels;	//	Labels of dimensional matrix rows		
-	char **			dimensionalMatrixColumnLabels;	//	Labels of dimensional matrix columns 
-	double ***		nullSpace;			//	Initial null space and parameter used in kernel printer
-	double ***		nullSpaceWithoutDuplicates;	//	Duplicate kernels are taken out
-	double ***		nullSpaceRowReordered;		//	Reorders the rows of the kernels lexicographically
-	double ***		nullSpaceCanonicallyReordered;	//	Canonically reordered
-	char ***		canonicallyReorderedLabels;	//	Debugging use
-	int			kernelColumnCount;
-	int			numberOfUniqueKernels;		//	Saves the unique kernel count
-	int			numberOfTotalKernels;		//	Saves the total kernels before canonicalisation
-	int *			permutedIndexArrayPointer;	//	Saves the permutation indeces
-	int ** 			numberOfConstPiArray;		//	Saves the number of constant Pi in each kernel
+struct Invariant {
+	char *	     identifier;  //	Name of the physics quantity, of type Tidentifier
+	Scope *	     scope;
+	SourceInfo * sourceInfo;
+	IrNode *     parameterList;  //	This is just bunch of IrNode's in Xseq
+	uint64_t     id;
+	IrNode *     constraints;
+	double *     dimensionalMatrix;		     //	Dimensional matrix
+	int	     dimensionalMatrixRowCount;	     //	Number of dimensional matrix rows
+	int	     dimensionalMatrixColumnCount;   //	Number of dimensional matrix columns
+	char **	     dimensionalMatrixRowLabels;     //	Labels of dimensional matrix rows
+	char **	     dimensionalMatrixColumnLabels;  //	Labels of dimensional matrix columns
+	double ***   nullSpace;			     //	Initial null space and parameter used in kernel printer
+	double ***   nullSpaceWithoutDuplicates;     //	Duplicate kernels are taken out
+	double ***   nullSpaceRowReordered;	     //	Reorders the rows of the kernels lexicographically
+	double ***   nullSpaceCanonicallyReordered;  //	Canonically reordered
+	char ***     canonicallyReorderedLabels;     //	Debugging use
+	int	     kernelColumnCount;
+	int	     numberOfUniqueKernels;	 //	Saves the unique kernel count
+	int	     numberOfTotalKernels;	 //	Saves the total kernels before canonicalisation
+	int *	     permutedIndexArrayPointer;	 //	Saves the permutation indeces
+	int **	     numberOfConstPiArray;	 //	Saves the number of constant Pi in each kernel
 
-	Invariant *		next;
+	Invariant * next;
 };
 
 struct Signal {
-	IrNode *		baseNode;				//	The baseSignalDefinition IrNode.
-	char *			identifier;				//	The signal identifier.
-	char *			invariantExpressionIdentifier;	//Identifier used in invariant expressions.
-	int			axis;					//	The axis of the multi axis signal that the signal corresponds to. Default value is zero.
-	char *			sensorIdentifier;		//	Identifier of the sensor associated to a signal.
-	int			physicalGroupNumber;	//  Conveys information about the physical origin of the signal. (e.g. The I2C bus number of a sensor connected to Ipsa).
-	int			dimensionIndex;			//	Conveys information about the dimension of the signal. Currently used for storing the dimension index for Ipsa.
-	Signal *		relatedSignalList;		//	List of signals that should be co-sampled with this signal.
-	Signal *		relatedSignalListNext;	//	Move to the next element of the relatedSignalList.
-	Signal *		relatedSignalListPrev;	//	Move to the previous element of the relatedSignalList.
+	IrNode * baseNode;			 //	The baseSignalDefinition IrNode.
+	char *	 identifier;			 //	The signal identifier.
+	char *	 invariantExpressionIdentifier;	 // Identifier used in invariant expressions.
+	int	 axis;				 //	The axis of the multi axis signal that the signal corresponds to. Default value is zero.
+	char *	 sensorIdentifier;		 //	Identifier of the sensor associated to a signal.
+	int	 physicalGroupNumber;		 //  Conveys information about the physical origin of the signal. (e.g. The I2C bus number of a sensor connected to Ipsa).
+	int	 dimensionIndex;		 //	Conveys information about the dimension of the signal. Currently used for storing the dimension index for Ipsa.
+	Signal * relatedSignalList;		 //	List of signals that should be co-sampled with this signal.
+	Signal * relatedSignalListNext;		 //	Move to the next element of the relatedSignalList.
+	Signal * relatedSignalListPrev;		 //	Move to the previous element of the relatedSignalList.
 };
 
-struct Physics
-{
-	char *			identifier;			//	Name of the physics quantity. of type Tidentifier
-	uint64_t		id;
-	int			subindex;			//	Index for further identification. e.g.) acceleration along x, y, z axes
-	Scope *			scope;
-	Scope *			uncertaintyScope;
-	SourceInfo *		sourceInfo;
-	bool			isVector;
-	Physics *		vectorCounterpart;		//	Non-NULL if a scalar AND counterpart defined in vectorScalarPairScope
-	Physics *		scalarCounterpart;		//	Non-NULl if a vector AND counterpart defined in vectorScalarPairScope
-	double			value;				//	For constants like Pi or gravitational acceleration
-	bool			isConstant;
-	Dimension *		dimensions;
-	char *			dimensionAlias;
-	char *			dimensionAliasAbbreviation;
-	Physics *		definition;
+struct Physics {
+	char *	     identifier;  //	Name of the physics quantity. of type Tidentifier
+	uint64_t     id;
+	int	     subindex;	//	Index for further identification. e.g.) acceleration along x, y, z axes
+	Scope *	     scope;
+	Scope *	     uncertaintyScope;
+	SourceInfo * sourceInfo;
+	bool	     isVector;
+	Physics *    vectorCounterpart;	 //	Non-NULL if a scalar AND counterpart defined in vectorScalarPairScope
+	Physics *    scalarCounterpart;	 //	Non-NULl if a vector AND counterpart defined in vectorScalarPairScope
+	double	     value;		 //	For constants like Pi or gravitational acceleration
+	bool	     isConstant;
+	Dimension *  dimensions;
+	char *	     dimensionAlias;
+	char *	     dimensionAliasAbbreviation;
+	Physics *    definition;
 
-	Physics *		next;
+	Physics * next;
 };
 
 typedef enum {
@@ -1001,185 +951,175 @@ typedef enum {
 } SensorInterfaceType;
 
 struct Modality {
-	char *		identifier;		/* Modality name, e.g, "bmx055xAcceleration" */
-	Signal *	signal;			/* Signal type to follow */
-	Physics *	_physics;		/* Temporary field */
-	double		rangeLowerBound;
-	double		rangeUpperBound;
+	char *	  identifier; /* Modality name, e.g, "bmx055xAcceleration" */
+	Signal *  signal;     /* Signal type to follow */
+	Physics * _physics;   /* Temporary field */
+	double	  rangeLowerBound;
+	double	  rangeUpperBound;
 
-	int		precisionBits;
-	double		precisionCost;
+	int    precisionBits;
+	double precisionCost;
 
-	double		accuracy;
-	double		accuracyCost;
+	double accuracy;
+	double accuracyCost;
 	// Signal *	accuracySignal;
-	double 		resolution;
-	
-	SensorInterfaceType	interfaceType;	/* WiP */
-	/* Missing register address for modality */
-	uint64_t	registerAddress;
+	double resolution;
 
-	Modality *	next;
+	SensorInterfaceType interfaceType; /* WiP */
+	/* Missing register address for modality */
+	uint64_t registerAddress;
+
+	Modality * next;
 	// Modality *	prev;
 };
 
 struct Sensor {
-	IrNode *	baseNode;	/* Pointer to AST node of definition */
-	char *		identifier;	/* Definition identifier */
-	Modality *	modalityList;	/* List of sensor modalities */
-	uint16_t	erasureToken;
+	IrNode *   baseNode;	 /* Pointer to AST node of definition */
+	char *	   identifier;	 /* Definition identifier */
+	Modality * modalityList; /* List of sensor modalities */
+	uint16_t   erasureToken;
 
-	Sensor *	next;
+	Sensor * next;
 	// Sensor *	prev;
 };
 
-struct IntegralList
-{
-	Physics *		head;
-	IntegralList *		next;
+struct IntegralList {
+	Physics *      head;
+	IntegralList * next;
 };
 
-struct IrNode
-{
-	IrNodeType		type;
+struct IrNode {
+	IrNodeType type;
 
 	/*
 	 *	Syntactic (AST) information.
 	 */
-	char *			tokenString;
-	Token *			token;
-	SourceInfo *		sourceInfo;
-	IrNode *		irParent;
-	IrNode *		irLeftChild;
-	IrNode *		irRightChild;
+	char *	     tokenString;
+	Token *	     token;
+	SourceInfo * sourceInfo;
+	IrNode *     irParent;
+	IrNode *     irLeftChild;
+	IrNode *     irRightChild;
 
-	Symbol *		symbol;
+	Symbol * symbol;
 
 	/*
 	 *	Used for evaluating dimensions in expressions
 	 */
-	Physics *		physics;
-	NoisyType		noisyType;
+	Physics * physics;
+	NoisyType noisyType;
 
 	/*
 	 *	Used for connecting invariant parameters to signals.
 	 */
-	Signal *		signal;
+	Signal * signal;
 
 	/*
-	*	Used for type checking invariant parameters during invariant call.
-	*/
-	Invariant *		invariant;
-	
+	 *	Used for type checking invariant parameters during invariant call.
+	 */
+	Invariant * invariant;
+
 	/*
 	 *	Only if this node belongs to a ParseNumericExpression subtree
 	 */
-	double			value;
-	int				integerValue;
+	double value;
+	int    integerValue;
 
-	int			subindexStart;
-	int			subindexEnd;
+	int subindexStart;
+	int subindexEnd;
 
 	/*
 	 *	A parameter tuple of length n has ordering from zero to n - 1
 	 */
-	int			parameterNumber;
+	int parameterNumber;
 
 	/*
 	 *	Used for coloring the IR tree, e.g., during Graphviz/dot generation
 	 */
-	IrNodeColor		nodeColor;
+	IrNodeColor nodeColor;
 
 	/*
 		Used to keep track of whether the node was visited or not
 	 */
-	bool			isVisited;   			
+	bool isVisited;
 };
 
-
-struct SourceInfo
-{
+struct SourceInfo {
 	/*
 	 *	Not yet used; for when we implement includes, this will be
 	 *	the 'genealogy' of includes leading to this token.
 	 */
-	char **			genealogy;
-	
-	char *			fileName;
-	uint64_t		lineNumber;
-	uint64_t		columnNumber;
-	uint64_t		length;
+	char ** genealogy;
+
+	char *	 fileName;
+	uint64_t lineNumber;
+	uint64_t columnNumber;
+	uint64_t length;
 };
 
+struct Token {
+	IrNodeType   type;
+	char *	     identifier;
+	int64_t	     integerConst;
+	double	     realConst;
+	char *	     stringConst;
+	SourceInfo * sourceInfo;
 
-struct Token
-{
-	IrNodeType		type;
-	char *			identifier;
-	int64_t			integerConst;
-	double			realConst;
-	char *			stringConst;
-	SourceInfo *		sourceInfo;
-	
-	Token *			prev;
-	Token *			next;
+	Token * prev;
+	Token * next;
 };
 
-
-
-struct Scope
-{
+struct Scope {
 	/*
 	 *	For named scopes (at the moment, only Progtypes)
 	 */
-	char *			identifier;
+	char * identifier;
 
-	int			currentSubindex;
+	int currentSubindex;
 
 	/*
 	 *	Hierarchy. The firstChild is used to access its siblings via firstChild->next
 	 */
-	Scope *			parent;
-	Scope *			firstChild;
+	Scope * parent;
+	Scope * firstChild;
 
 	/*
 	 *	Symbols in this scope. The list of symbols is accesed via firstSymbol->next
 	 */
-	Symbol *		firstSymbol;
+	Symbol * firstSymbol;
 
 	/*
 	 *	Each invariant scope will have its own list of parameters
 	 */
-	IrNode *		scopeParameterList;		//	This is just bunch of IrNode's in Xseq
+	IrNode * scopeParameterList;  //	This is just bunch of IrNode's in Xseq
 
 	/*
 	 *	For the config file, we only have one global scope that keeps track of all
 	 *	dimensions ad physics quantities.
 	 */
-	Dimension *		firstDimension;
-	Physics *		firstPhysics;
+	Dimension * firstDimension;
+	Physics *   firstPhysics;
 
 	/*
 	 *	Where in source scope begins and ends
 	 */
-	SourceInfo *		begin;
-	SourceInfo *		end;
+	SourceInfo * begin;
+	SourceInfo * end;
 
 	/*
 	 *	For chaining together scopes (currently only used for Progtype
 	 *	scopes and for chaining together children).
 	 */
-	Scope *			next;
-	Scope *			prev;
+	Scope * next;
+	Scope * prev;
 
 	/*
 	 *	Used for coloring the IR tree, e.g., during Graphviz/dot generation
 	 */
-	IrNodeColor		nodeColor;
+	IrNodeColor nodeColor;
 };
 
-typedef enum
-{
+typedef enum {
 	kNoisySymbolTypeTypeError,
 	kNoisySymbolTypeProgtype,
 	kNoisySymbolTypeConstantDeclaration,
@@ -1199,243 +1139,237 @@ typedef enum
 	kNoisySymbolTypeMax,
 } NoisySymbolType;
 
-
-struct Symbol
-{
-	char *			identifier;
+struct Symbol {
+	char * identifier;
 
 	/*
 	 *	This field is duplicated in the AST node, since only
 	 *	identifiers get into the symbol table:
 	 */
-	SourceInfo *	sourceInfo;
+	SourceInfo * sourceInfo;
 
 	/*
 	 *	Declaration, type definition, use, etc. (kNoisySymbolTypeXXX)
 	 */
-	NoisySymbolType 	symbolType;
-	NoisyType		noisyType;
+	NoisySymbolType symbolType;
+	NoisyType	noisyType;
 
 	/*
-	*	The IrNode where function definition starts. Used for loading functions.
-	*/
-	IrNode *		functionDefinition;
+	 *	The IrNode where function definition starts. Used for loading functions.
+	 */
+	IrNode * functionDefinition;
 
 	/*
-	*	Number of parameters. Used only for functions and Noisy
-	*	code generation.
-	*/
-	int			parameterNum;
-	bool			isTypeComplete;
-	bool			isSensorChannel;
-	bool			isChannel;
-	int			paramPosition;
-	LLVMValueRef		llvmPointer;
-	LLVMValueRef		inputChanAddress;
+	 *	Number of parameters. Used only for functions and Noisy
+	 *	code generation.
+	 */
+	int	     parameterNum;
+	bool	     isTypeComplete;
+	bool	     isSensorChannel;
+	bool	     isChannel;
+	int	     paramPosition;
+	LLVMValueRef llvmPointer;
+	LLVMValueRef inputChanAddress;
 
 	/*
 	 *	Scope within which sym appears
 	 */
-	Scope *			scope;
+	Scope * scope;
 
 	/*
 	 *	If an identifier use, definition's Sym, if any
 	 */
-	Symbol *		definition;
+	Symbol * definition;
 
 	/*
 	 *	Subtree in AST that represents typeexpr
 	 */
-	IrNode *		typeTree;
+	IrNode * typeTree;
 
 	/*
 	 *	If an I_CONST, its value.
 	 */
-	int			intConst;
-	double			realConst;
-	char *			stringConst;
-	
+	int    intConst;
+	double realConst;
+	char * stringConst;
+
 	/*
 	 *	For chaining together sibling symbols in the same scope
 	 */
-	Symbol *		next;
-	Symbol *		prev;
+	Symbol * next;
+	Symbol * prev;
 };
-
 
 typedef struct
 {
 	/*
 	 *	Timestamps to track lifecycle
 	 */
-	uint64_t		initializationTimestamp;
-	TimeStamp *		timestamps;
-	uint64_t		timestampCount;
-	uint64_t		timestampSlots;
+	uint64_t    initializationTimestamp;
+	TimeStamp * timestamps;
+	uint64_t    timestampCount;
+	uint64_t    timestampSlots;
 
 	/*
 	 *	Track aggregate time spent in all routines, by incrementing
 	 *	timeAggregates[timeAggregatesLastKey] by (now - timeAggregatesLastTimestamp)
 	 */
-	uint64_t *		timeAggregates;
-	TimeStampKey		timeAggregatesLastKey;
-	uint64_t		timeAggregatesLastTimestamp;
-	uint64_t		timeAggregateTotal;
-	uint64_t *		callAggregates;
-	uint64_t		callAggregateTotal;
+	uint64_t *   timeAggregates;
+	TimeStampKey timeAggregatesLastKey;
+	uint64_t     timeAggregatesLastTimestamp;
+	uint64_t     timeAggregateTotal;
+	uint64_t *   callAggregates;
+	uint64_t     callAggregateTotal;
 
 	/*
 	 *	Used to get error status from FlexLib routines
 	 */
-	FlexErrState *		Fe;
+	FlexErrState * Fe;
 
 	/*
 	 *	State for the portable/monitoring allocator (FlexM)
 	 */
-	FlexMstate *		Fm;
+	FlexMstate * Fm;
 
 	/*
 	 *	State for portable/buffering print routines (FlexP)
 	 *	We have one buffer for informational messages, another
 	 *	for errors and warnings.
 	 */
-	FlexPrintBuf *		Fperr;
-	FlexPrintBuf *		Fpinfo;
-	FlexPrintBuf *		Fpsmt2;
-	FlexPrintBuf *		Fpc;
-	FlexPrintBuf *		Fph;
-	FlexPrintBuf *		Fpg;
-	FlexPrintBuf *		Fprtl;
-	FlexPrintBuf *		Fpmathjax;
-	FlexPrintBuf *		Fpipsa;
+	FlexPrintBuf * Fperr;
+	FlexPrintBuf * Fpinfo;
+	FlexPrintBuf * Fpsmt2;
+	FlexPrintBuf * Fpc;
+	FlexPrintBuf * Fph;
+	FlexPrintBuf * Fpg;
+	FlexPrintBuf * Fprtl;
+	FlexPrintBuf * Fpmathjax;
+	FlexPrintBuf * Fpipsa;
 
 	/*
 	 *	The output file of the last render. TODO: Not very happy
 	 *	with this solution as it stands... (inherited from Sal/svm)
 	 */
-	char *			lastDotRender;
-
+	char * lastDotRender;
 
 	/*
 	 *	This is the name of the module that the file we're parsing implements
 	 */
-	char *			moduleOfFile;
+	char * moduleOfFile;
 
 	/*
 	 *	This is the target parameter for the targetParam backend
 	 */
-	char *			targetParam;
+	char * targetParam;
 
 	/*
 	 *	This is the invariant where the target parameter appears only once (for the targetParam backend)
 	 */
-	int 			targetParamLocatedKernel;
+	int targetParamLocatedKernel;
 
 	/*
 	 *	This is data type that a signal will be typedef'ed to
 	 *	in the signal typedef generation backend
 	 */
-	char *		signalTypedefDatatype;
+	char * signalTypedefDatatype;
 
 	/*
 	 *	We keep a global handle on the list of module scopes, for easy reference.
 	 *	In this use case, the node->identifier holds the scopes string name, and we
 	 *	chain then using their prev/next fields.
 	 */
-	Scope *		moduleScopes;
+	Scope * moduleScopes;
 
 	/*
 	 *	Lexer state
 	 */
-	FILE *			filePointer;
-	char *			fileName;
-	char *			lineBuffer;
-	uint64_t		columnNumber;
-	uint64_t		lineNumber;
-	uint64_t		lineLength;
-	char *			currentToken;
-	uint64_t		currentTokenLength;
-	Token *			tokenList;
-	Token *			lastToken;
-	Symbol *		currentFunction;
+	FILE *	 filePointer;
+	char *	 fileName;
+	char *	 lineBuffer;
+	uint64_t columnNumber;
+	uint64_t lineNumber;
+	uint64_t lineLength;
+	char *	 currentToken;
+	uint64_t currentTokenLength;
+	Token *	 tokenList;
+	Token *	 lastToken;
+	Symbol * currentFunction;
 
 	/*
 	 *	The root of the IR tree, and top scope
 	 */
-	IrNode *		noisyIrRoot;
-	IrNode *		newtonIrRoot;
-	Scope *			noisyIrTopScope;
-	Scope *			newtonIrTopScope;
+	IrNode * noisyIrRoot;
+	IrNode * newtonIrRoot;
+	Scope *	 noisyIrTopScope;
+	Scope *	 newtonIrTopScope;
 
 	/*
 	 *	Output file name when emitting bytecode/protobuf
 	 */
-	char *			outputFilePath;
-	char *			outputSmtFilePath;
-	char *			outputCFilePath;
-	char *			outputSignalTypedefHeaderFilePath;
-	char *			outputRTLFilePath;
-	char *			outputEstimatorSynthesisFilePath;
-	char *			outputIpsaFilePath;
-	
+	char * outputFilePath;
+	char * outputSmtFilePath;
+	char * outputCFilePath;
+	char * outputSignalTypedefHeaderFilePath;
+	char * outputRTLFilePath;
+	char * outputEstimatorSynthesisFilePath;
+	char * outputIpsaFilePath;
+
 	/*
 	 *	Invariant identifiers specified for State Estimator Synthesis
 	 */
-	char *			estimatorProcessModel;
-	char *			estimatorMeasurementModel;
-	bool			autodiff;
-	
+	char * estimatorProcessModel;
+	char * estimatorMeasurementModel;
+	bool   autodiff;
+
 	/*
 	 *	LLVM IR input file
 	 */
-	char *			llvmIR;
-	
+	char * llvmIR;
+
 	/*
 	 *	Variables for storing lists of identifiers attached
 	 *	to a physical group number.
 	 */
-	char *			physicalGroup1;
-	char *			physicalGroup2;
+	char * physicalGroup1;
+	char * physicalGroup2;
 
 	/*
 	 *	Variables to keep track of the kernel number and pi number
 	 *	specified by the user for Pi Groups Signal Annotation.
 	 */
-	int			kernelNumber;
-	int			piNumber;
-	bool			enableKernelSelect;
-	bool			enablePiSelect;
+	int  kernelNumber;
+	int  piNumber;
+	bool enableKernelSelect;
+	bool enablePiSelect;
 
-	CommonMode		mode;
-	uint64_t		verbosityLevel;
-	uint64_t		dotDetailLevel;
-	uint64_t		optimizationLevel;
-	uint64_t		irPasses;
-	uint64_t		irBackends;
+	CommonMode mode;
+	uint64_t   verbosityLevel;
+	uint64_t   dotDetailLevel;
+	uint64_t   optimizationLevel;
+	uint64_t   irPasses;
+	uint64_t   irBackends;
 
-
-	jmp_buf			jmpbuf;
-	bool			jmpbufIsValid;
+	jmp_buf jmpbuf;
+	bool	jmpbufIsValid;
 
 	/*
 	 *	Global index of which prime numbers we have used for the dimension id's
 	 */
-	int		primeNumbersIndex;
-	Invariant *	invariantList;
-	Sensor *	sensorList;
+	int	    primeNumbersIndex;
+	Invariant * invariantList;
+	Sensor *    sensorList;
 } State;
 
-
-void		fatal(State *  C, const char *  msg) __attribute__((noreturn));
-void		error(State *  C, const char *  msg);
-void		timestampsInit(State *  C);
-void		timeStampDumpTimeline(State *  C);
-void		timeStampDumpResidencies(State *  C);
-State *		init(CommonMode mode);
-void		dealloc(State *  C);
-void		runPasses(State *  C);
-uint64_t	checkRss(State *  C);
-void		consolePrintBuffers(State *  C);
-void		printToFile(State *  C, const char *  msg, const char *  fileName, PostFileWriteAction action);
-void		renderDotInFile(State *  C, char *  pathName, char *  randomizedFileName);
-void		checkCgiCompletion(State *  C, const char *  pathName, const char *  renderExtension);
+void	 fatal(State * C, const char * msg) __attribute__((noreturn));
+void	 error(State * C, const char * msg);
+void	 timestampsInit(State * C);
+void	 timeStampDumpTimeline(State * C);
+void	 timeStampDumpResidencies(State * C);
+State *	 init(CommonMode mode);
+void	 dealloc(State * C);
+void	 runPasses(State * C);
+uint64_t checkRss(State * C);
+void	 consolePrintBuffers(State * C);
+void	 printToFile(State * C, const char * msg, const char * fileName, PostFileWriteAction action);
+void	 renderDotInFile(State * C, char * pathName, char * randomizedFileName);
+void	 checkCgiCompletion(State * C, const char * pathName, const char * renderExtension);

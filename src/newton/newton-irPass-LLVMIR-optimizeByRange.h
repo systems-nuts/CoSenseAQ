@@ -39,12 +39,12 @@ POSSIBILITY OF SUCH DAMAGE.
 #define NEWTON_IR_PASS_LLVM_IR_OPTIMIZE_BY_RANGE
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif /* __cplusplus */
 
 void
-irPassLLVMIROptimizeByRange(State * N, bool enableQuantization, bool enableOverload, bool enableBuiltinAssume);
+irPassLLVMIROptimizeByRange(State * N, bool enableQuantization, bool enableOverload,
+			    bool enableBuiltinAssume, bool enableQuantDecider);
 
 #ifdef __cplusplus
 } /* extern "C" */
