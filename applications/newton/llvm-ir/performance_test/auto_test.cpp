@@ -18,7 +18,8 @@
 #include <vector>
 #include <tuple>
 
-const size_t iteration_num = 1;
+const size_t iteration_num = 5;
+constexpr int WARMUP_ITERATIONS = 1;
 
 struct perfData {
     int64_t inst_count_avg;
@@ -39,7 +40,7 @@ struct timerData {
     std::vector<double> compile_time;
 };
 
-#define TLOG_TIMESPEC_NSEC_PER_SEC  1000000000
+#define TLOG_TIMESPEC_NSEC_PER_SEC  10000000
 
 typedef struct timespec timespec;
 
@@ -67,6 +68,20 @@ timespec toc(timespec* start_time, const char* prefix, bool print) {
 	timespec diff_time = diff(*start_time, end_time);
 	*start_time = end_time;
 	return diff_time;
+}
+
+/* ---------- trimmed mean helper ---------- */
+template <typename T>
+double trimmedMean(std::vector<T> v, double trim_ratio = 0.10) {
+	if (v.empty()) return 0.0;
+	std::sort(v.begin(), v.end());
+
+	size_t n   = v.size();
+	size_t cut = std::max<size_t>(1, static_cast<size_t>(n * trim_ratio));
+	if (cut * 2 >= n) cut = n / 2;
+
+	double sum = std::accumulate(v.begin() + cut, v.end() - cut, 0.0);
+	return sum / static_cast<double>(n - 2 * cut);
 }
 
 
@@ -136,9 +151,8 @@ std::pair<int64_t, int64_t> processDataPerf(const std::string test_case, const s
     int64_t inst_count, time_consumption;
 
     // perf command
-    //todo Quantization prefix
     std::string quant_prefix = (test_case.find("_opt") != std::string::npos) ? "AUTO_QUANT=1 " : "";
-    std::string cmd = "bash -c '" + quant_prefix + "ENABLE_OVERLOAD=true make " + test_case + " >& compile.log'";
+    std::string cmd = "bash -c '" + quant_prefix + "make " + test_case + " >& compile.log'";
     std::cout << "[DEBUG] Running command: " << cmd << std::endl;
     //    std::string cmd = "bash -c 'ENABLE_OVERLOAD=true make " + test_case + " >& compile.log'";
     int command_return = system(cmd.c_str());
@@ -149,7 +163,7 @@ std::pair<int64_t, int64_t> processDataPerf(const std::string test_case, const s
     cmd = "bash -c 'perf stat -B ./main_out " + params;
 
 //    cmd += "if=/dev/zero of=/dev/null count=1000000";
-    cmd += "if=/dev/zero of=/dev/null count=1";
+    cmd += "if=/dev/zero of=/dev/null count=10000000";
     cmd += " 2>&1 | tee tmp.log'";
     command_return = system(cmd.c_str());
     if (command_return != 0) {
@@ -187,8 +201,20 @@ std::pair<double, std::vector<double>> processDataTimer(const std::string test_c
     double time_consumption;
     std::vector<double> function_results;
 
+
+	/* ---------- Warm-up phase ---------- */
+	for (int i = 0; i < WARMUP_ITERATIONS; ++i) {
+		std::string warm_cmd = "bash -c './main_out " + params + " > /dev/null 2>&1'";
+		int warm_ret = system(warm_cmd.c_str());
+		if (warm_ret != 0) {
+			std::cerr << "[Warm-up] iteration " << i
+				  << " failed for " << test_case
+				  << " with params: " << params << std::endl;
+		}
+	}
+	/* ---------- End Warm-up ---------- */
+
     // perf command
-    //TODO Addd Quantization prefix
 //    std::string cmd = "bash -c 'make " + test_case + " >& compile.log'";
 //    std::string quant_prefix = "AUTO_QUANT=1 ";
 
@@ -196,7 +222,7 @@ std::pair<double, std::vector<double>> processDataTimer(const std::string test_c
 //    std::string cmd = "bash -c 'make " + test_case + " >& compile.log'";
 //    std::cout << "[DEBUG] Running command: " << cmd << std::endl;
     std::string quant_prefix = (test_case.find("_opt") != std::string::npos) ? "AUTO_QUANT=1 " : "";
-    std::string cmd = "bash -c '" + quant_prefix + "make " + test_case + " >& compile.log'";
+    std::string cmd = "bash -c '" + quant_prefix + " make " + test_case + " >& compile.log'";
     std::cout << "[DEBUG] Running command: " << cmd << std::endl;
 
 
@@ -324,7 +350,6 @@ struct perfData recordData(const std::string& test_cases, const std::string& par
 
 struct timerData recordTimerData(const std::string& test_cases, const std::string& param_str, int precision_bits, std::ofstream& ofs){
     timerData timer_data;
-
     for (size_t idx = 0; idx < iteration_num; idx++) {
 	    double compile_time = compileTargetCode(test_cases);
 	    timer_data.compile_time.emplace_back(compile_time);
@@ -346,12 +371,17 @@ struct timerData recordTimerData(const std::string& test_cases, const std::strin
     timer_data.ir_lines = getIrLines();
     timer_data.library_size = getLibSize();
 
-ofs << test_cases << "\t" << param_str << "\t" << precision_bits << "\t"
-    << timer_data.inst_count_avg << "\t"
-    << std::accumulate(timer_data.ms_time_consumption.begin(), timer_data.ms_time_consumption.end(), 0.0) / timer_data.ms_time_consumption.size() << "\t"
-    << timer_data.ir_lines << "\t" << timer_data.library_size << "\t"
-    << std::accumulate(timer_data.compile_time.begin(), timer_data.compile_time.end(), 0.0) / timer_data.compile_time.size()
-    << std::endl;
+	/* ---------- runtime trimmed-mean ---------- */
+	timer_data.time_consumption_avg = trimmedMean(timer_data.ms_time_consumption);
+	/* ------------------------------------------ */
+
+
+    ofs << test_cases << "\t" << param_str << "\t" << precision_bits << "\t"
+	    << timer_data.inst_count_avg << "\t"
+	    << std::accumulate(timer_data.ms_time_consumption.begin(), timer_data.ms_time_consumption.end(), 0.0) / timer_data.ms_time_consumption.size() << "\t"
+	    << timer_data.ir_lines << "\t" << timer_data.library_size << "\t"
+	    << std::accumulate(timer_data.compile_time.begin(), timer_data.compile_time.end(), 0.0) / timer_data.compile_time.size()
+	    << std::endl;
 
     return timer_data;
 }
@@ -359,12 +389,13 @@ ofs << test_cases << "\t" << param_str << "\t" << precision_bits << "\t"
 int main(int argc, char** argv)
 {
 	std::vector<std::string> test_cases{
-	    //            "perf_exp", "perf_log",
-	    //            "perf_acosh", "perf_j0",
-	    //            "perf_y0", "perf_rem_pio2", "perf_sincosf",
-	    //            "perf_float64_add", "perf_float64_div",
-	    //            "perf_float64_mul"};
-	    "perf_j0","perf_y0"};
+		// "perf_exp", "perf_log",
+		// "perf_acosh", "perf_j0",
+		// "perf_y0", "perf_rem_pio2", "perf_sincosf",
+		// "perf_float64_add", "perf_float64_div",
+		// "perf_float64_mul"};
+		"perf_j0","perf_y0"};
+	//"perf_y0"};
 
 
 	if (argc >= 2)
@@ -372,7 +403,6 @@ int main(int argc, char** argv)
 		test_cases.clear();
 		test_cases.emplace_back(argv[1]);
 	}
-
 
 	std::ofstream ofs("perf_quant.log");
 	if (!ofs.is_open())
@@ -385,87 +415,59 @@ int main(int argc, char** argv)
 	if (!avg_speedup.is_open())
 	{
 		std::cout << "error opening perf_quant.log";
-
 		return -1;
 	}
 
-	//    std::vector<std::vector<double>> normalParameters{
-	//	// BMX055 acceleration
-	//	{-2, 2},
-	//	{-4, 4},
-	//	{-8, 8},
-	//	{-16, 16},
-	//	// BMX055 gyroscope
-	//	{-125, 125},
-	//	// LM35 Centigrade Temperature Sensor
-	//	{-40, 110},
-	//	{-55, 150},
-	//	{0, 100},
-	//	{0, 70},
-	//	// LPS25H
-	//	{260, 1260},
-	//	// MAX31820 1-Wire Ambient Temperature Sensor
-	//	{10, 45},
-	//	{-55, 125},
-	//	// DHT11 Humidity Sensor
-	//	{20, 80},
-	//	{0, 50},
-	//	// LMP82064 Current Sensor and Voltage Monitor with SPI
-	//	{-0.2, 2},
-	//	// PCE-353 LEQ Sound Level Meter
-	//	{30, 130},
-	//	// LLS05-A Linear Light Sensor
-	//	{1, 200}
-	//    };
+
 
 	// param_range, precision_bits, frac_q
 	std::vector<std::tuple<std::vector<double>, int, int>> normalParameters = {
-	    // BMX055 acceleration
-	    {{-2, 2}, 12, 9},
-	    {{-4, 4}, 12, 8},
-	    {{-8, 8}, 12, 7},
-	    {{-16, 16}, 12, 6},
+		// BMX055 acceleration
+		{{-2, 2}, 12, 9},
+		{{-4, 4}, 12, 8},
+		{{-8, 8}, 12, 7},
+		{{-16, 16}, 12, 6},
 
-	    // BMX055 gyroscope
-	    {{-125, 125}, 16, 8},
+		// BMX055 gyroscope
+		{{-125, 125}, 16, 8},
 
-	    // LM35 Centigrade Temperature Sensor
-	    {{-40, 110}, 10, 2},
-	    {{-55, 150}, 11, 3},
-	    {{0, 100}, 10, 3},
-	    {{0, 70}, 10, 3},
+		// LM35 Centigrade Temperature Sensor
+		{{-40, 110}, 10, 2},
+		{{-55, 150}, 11, 3},
+		{{0, 100}, 10, 3},
+		{{0, 70}, 10, 3},
 
-	    // LPS25H Pressure Sensor
-	    {{260, 1260}, 14, 4},
+		// LPS25H Pressure Sensor
+		{{260, 1260}, 14, 4},
 
-	    // MAX31820 1-Wire Ambient Temperature Sensor
-	    {{10, 45}, 12, 6},
-	    {{-55, 125}, 11, 3},
+		// MAX31820 1-Wire Ambient Temperature Sensor
+		{{10, 45}, 12, 6},
+		{{-55, 125}, 11, 3},
 
-	    // DHT11 Humidity Sensor
-	    {{20, 80}, 8, 2},
-	    {{0, 50}, 8, 2},
+		// DHT11 Humidity Sensor
+		{{20, 80}, 8, 2},
+		{{0, 50}, 8, 2},
 
-	    // LMP82064 Current Sensor and Voltage Monitor with SPI
-	    {{-0.2, 2}, 14, 12},
+		// LMP82064 Current Sensor and Voltage Monitor with SPI
+		{{-0.2, 2}, 14, 12},
 
-	    // PCE-353 LEQ Sound Level Meter
-	    {{30, 130}, 8, 1},
+		// PCE-353 LEQ Sound Level Meter
+		{{30, 130}, 8, 1},
 
-	    // LLS05-A Linear Light Sensor
-	    {{1, 200}, 10, 2}};
+		// LLS05-A Linear Light Sensor
+		{{1, 200}, 10, 2}};
 
 	std::vector<std::vector<double>> trigonometricParams{
-	    {0, 0.17453292519943295},		       // (0, pi/18)
-	    {0.6981317007977318, 0.8726646259971648},  // (2pi/9, 5pi/18)
-	    {1.3962634015954636, 1.5707963267948966},  // (4pi/9, pi/2)
-	    {2.0943951023931953, 2.2689280275926285},  // (2pi/3, 13pi/18)
-	    {2.792526803190927, 2.9670597283903604},   // (8pi/9, 17pi/18)
-	    {3.490658503988659, 3.665191429188092},    // (10pi/9, 7pi/6)
-	    {4.1887902047863905, 4.363323129985824},   // (8pi/6, 25pi/18)
-	    {4.886921905584122, 5.061454830783556},    // (14pi/9, 29pi/18)
-	    {5.585053606381854, 5.759586531581288},    // (16pi/9, 33pi/18)
-	    {5.934119456780721, 6.1086523819801535}    // (17pi/9, 35pi/18)
+			    {0, 0.17453292519943295},		       // (0, pi/18)
+			    {0.6981317007977318, 0.8726646259971648},  // (2pi/9, 5pi/18)
+			    {1.3962634015954636, 1.5707963267948966},  // (4pi/9, pi/2)
+			    {2.0943951023931953, 2.2689280275926285},  // (2pi/3, 13pi/18)
+			    {2.792526803190927, 2.9670597283903604},   // (8pi/9, 17pi/18)
+			    {3.490658503988659, 3.665191429188092},    // (10pi/9, 7pi/6)
+			    {4.1887902047863905, 4.363323129985824},   // (8pi/6, 25pi/18)
+			    {4.886921905584122, 5.061454830783556},    // (14pi/9, 29pi/18)
+			    {5.585053606381854, 5.759586531581288},    // (16pi/9, 33pi/18)
+			    {5.934119456780721, 6.1086523819801535}    // (17pi/9, 35pi/18)
 	};
 
 	if (argc == 4)
@@ -483,9 +485,7 @@ int main(int argc, char** argv)
 	}
 
 
-
 	ofs << "test case\tparam\tprecision_bits\tinstruction count\ttime consumption\tir lines\tlibrary size\tcompile time" << std::endl;
-
 	avg_speedup << "test cast\tinstruction count\ttime consumption\tir lines\tlibrary size\tcompile time" << std::endl;
 
 	for (size_t case_id = 0; case_id < test_cases.size(); case_id++)
@@ -495,11 +495,7 @@ int main(int argc, char** argv)
 		int avg_compile_time_speedup = 0;
 		int avg_ir_reduce	= 0;
 		int avg_lib_size_reduce = 0;
-		//        const std::vector<std::vector<double>> parameters =
-		//                test_cases[case_id] == "perf_float64_sin" ? trigonometricParams : normalParameters;
-		// TODO
 		const bool is_trig = test_cases[case_id] == "perf_float64_sin";
-		// 对于普通测试（非trig），使用 normalParameters
 		if (!is_trig)
 		{
 			for (const auto & entry : normalParameters)
@@ -507,17 +503,12 @@ int main(int argc, char** argv)
 				const std::vector<double> & range  = std::get<0>(entry);
 				int			    frac_q = std::get<2>(entry);
 
-				// 自动重编译 newton 以更新 MAX_PRECISION_BITS=frac_q
 				std::string frac_str = std::to_string(frac_q);
 				std::string rebuild_cmd =
 				    "bash -c '"
-				    "echo \"[DEBUG] Cleaning object files...\" && "
 				    "rm -f ../../../../src/newton/newton-irPass-LLVMIR-quantization.o ../../../../src/newton/newton-irPass-LLVMIR-optimizeByRange.o && "
-				    "echo \"[DEBUG] Running make with MAX_PRECISION_BITS=" + frac_str + "\" && "
 				    "make -C ../../../../src/newton MAX_PRECISION_BITS=" + frac_str + " BIT_WIDTH=32 > build_" + frac_str + ".log 2>&1'";
 
-//				    "2>&1 | tee build_" + frac_str + ".log'";
-//\\				std::string rebuild_cmd = "make -C ../../../src/newton MAX_PRECISION_BITS=" + std::to_string(frac_q) + " VERBOSE=1 rebuild-quant-opt";
 				std::cout << "[INFO] Rebuilding Newton with MAX_PRECISION_BITS = " << frac_q << std::endl;
 				int ret = system(rebuild_cmd.c_str());
 				if (ret != 0)
@@ -531,10 +522,8 @@ int main(int argc, char** argv)
 				const double	  p2	    = range.back() + 0.3;
 				change_nt_range("sed -i 's/15 mjf, 36 mjf/", "/g' ../../sensors/test.nt", {p1, p2});
 
-
 				timerData ori_perf_data = recordTimerData(test_cases[case_id], param_str,std::get<1>(entry), ofs);
 				timerData opt_perf_data = recordTimerData(test_cases[case_id] + "_opt", param_str, std::get<1>(entry), ofs);
-
 
 				// check function results
 				if (!std::equal(ori_perf_data.function_results.begin(), ori_perf_data.function_results.end(),
@@ -571,14 +560,20 @@ int main(int argc, char** argv)
 				}
 				else
 				{
-					ori_perf_data.time_consumption_avg = std::accumulate(ori_perf_data.ms_time_consumption.begin(),
-											     ori_perf_data.ms_time_consumption.end(),
-											     0.0) /
-									     ori_perf_data.ms_time_consumption.size();
-					opt_perf_data.time_consumption_avg = std::accumulate(opt_perf_data.ms_time_consumption.begin(),
-											     opt_perf_data.ms_time_consumption.end(),
-											     0.0) /
-									     opt_perf_data.ms_time_consumption.size();
+					// ori_perf_data.time_consumption_avg = std::accumulate(ori_perf_data.ms_time_consumption.begin(),
+					// 						     ori_perf_data.ms_time_consumption.end(),
+					// 						     0.0) /
+					// 				     ori_perf_data.ms_time_consumption.size();
+					// opt_perf_data.time_consumption_avg = std::accumulate(opt_perf_data.ms_time_consumption.begin(),
+					// 						     opt_perf_data.ms_time_consumption.end(),
+					// 						     0.0) /
+					// 				     opt_perf_data.ms_time_consumption.size();
+
+					ori_perf_data.time_consumption_avg =trimmedMean(ori_perf_data.ms_time_consumption);
+					opt_perf_data.time_consumption_avg =
+						       trimmedMean(opt_perf_data.ms_time_consumption);
+
+
 					ori_perf_data.compile_time_avg = std::accumulate(ori_perf_data.compile_time.begin(),
 											 ori_perf_data.compile_time.end(),
 											 0.0) / ori_perf_data.compile_time.size();
@@ -587,22 +582,31 @@ int main(int argc, char** argv)
 											 0.0) / opt_perf_data.compile_time.size();
 
 					inst_speedup = round((ori_perf_data.inst_count_avg - opt_perf_data.inst_count_avg) * 100 / opt_perf_data.inst_count_avg);
-					time_speedup = round((ori_perf_data.time_consumption_avg - opt_perf_data.time_consumption_avg) * 100 / opt_perf_data.time_consumption_avg);
-					compile_time_speedup = round((ori_perf_data.compile_time_avg - opt_perf_data.compile_time_avg)
-								     * 100 / opt_perf_data.compile_time_avg);
+					if (fabs(opt_perf_data.time_consumption_avg) < 1e-5)
+					{
+						time_speedup = 0;
+					} else {
+						time_speedup = round((ori_perf_data.time_consumption_avg - opt_perf_data.time_consumption_avg) * 100.0 / opt_perf_data.time_consumption_avg);
+					}
+					compile_time_speedup = round((ori_perf_data.compile_time_avg - opt_perf_data.compile_time_avg) * 100 / opt_perf_data.compile_time_avg);
 				}
 
-				if (ori_perf_data.ir_lines > opt_perf_data.ir_lines)
-				{
-					ir_reduce	= round((ori_perf_data.ir_lines - opt_perf_data.ir_lines) * 100 / opt_perf_data.ir_lines);
-					lib_size_reduce = round((ori_perf_data.library_size - opt_perf_data.library_size) * 100 / opt_perf_data.library_size);
-				}
-				else
-				{
-					//                        assert(false && "Need to check why this case increase size!!!!!!");
-					ir_reduce	= 0;
-					lib_size_reduce = 0;
-				}
+
+				ir_reduce = round((ori_perf_data.ir_lines - opt_perf_data.ir_lines) * 100.0 / opt_perf_data.ir_lines);
+				lib_size_reduce = round((ori_perf_data.library_size - opt_perf_data.library_size) * 100.0 / opt_perf_data.library_size);
+
+
+				// if (ori_perf_data.ir_lines > opt_perf_data.ir_lines)
+				// {
+				// 	ir_reduce	= round((ori_perf_data.ir_lines - opt_perf_data.ir_lines) * 100 / opt_perf_data.ir_lines);
+				// 	lib_size_reduce = round((ori_perf_data.library_size - opt_perf_data.library_size) * 100 / opt_perf_data.library_size);
+				// }
+				// else
+				// {
+				// 	//                        assert(false && "Need to check why this case increase size!!!!!!");
+				// 	ir_reduce	= 0;
+				// 	lib_size_reduce = 0;
+				// }
 				ofs << "speed up after optimization\t" << param_str << "\t" << inst_speedup << "%\t" << time_speedup << "%\t"
 				    << ir_reduce << "%\t" << lib_size_reduce << "%\t" << compile_time_speedup << "%" << std::endl;
 				std::cout << test_cases[case_id] << ": speed up after optimization\t" << param_str << "\t" << inst_speedup
@@ -620,34 +624,36 @@ int main(int argc, char** argv)
 						// {p.front(), p.back()});
 						{range.front(), range.back()});
 				change_nt_range("sed -i 's/", "/15 mjf, 36 mjf/g' ../../sensors/test.nt", {p1, p2});
-			}
-			size_t count	    = is_trig ? trigonometricParams.size() : normalParameters.size();
-			avg_inst_speedup    = round(avg_inst_speedup / count);
-			avg_time_speedup    = round(avg_time_speedup / count);
-			avg_ir_reduce	    = round(avg_ir_reduce / count);
-			avg_lib_size_reduce = round(avg_lib_size_reduce / count);
-			avg_compile_time_speedup = round(avg_compile_time_speedup / count);
-			//	    avg_inst_speedup = round(avg_inst_speedup / parameters.size());
-			//	    avg_time_speedup = round(avg_time_speedup / parameters.size());
-			//	    avg_ir_reduce = round(avg_ir_reduce / parameters.size());
-			//	    avg_lib_size_reduce = round(avg_lib_size_reduce / parameters.size());
-			avg_speedup << test_cases[case_id] << "\t" << avg_inst_speedup << "%\t"
-				    << avg_time_speedup << "%\t" << avg_ir_reduce << "%\t" << avg_lib_size_reduce << "%\t"
-				    << avg_compile_time_speedup << "%" << std::endl;
+				// }
+				size_t count	    = is_trig ? trigonometricParams.size() : normalParameters.size();
+				avg_inst_speedup    = round(avg_inst_speedup / count);
+				avg_time_speedup    = round(avg_time_speedup / count);
+				avg_ir_reduce	    = round(avg_ir_reduce / count);
+				avg_lib_size_reduce = round(avg_lib_size_reduce / count);
+				avg_compile_time_speedup = round(avg_compile_time_speedup / count);
+				//	    avg_inst_speedup = round(avg_inst_speedup / parameters.size());
+				//	    avg_time_speedup = round(avg_time_speedup / parameters.size());
+				//	    avg_ir_reduce = round(avg_ir_reduce / parameters.size());
+				//	    avg_lib_size_reduce = round(avg_lib_size_reduce / parameters.size());
+				avg_speedup << test_cases[case_id] << "\t" << avg_inst_speedup << "%\t"
+					    << avg_time_speedup << "%\t" << avg_ir_reduce << "%\t" << avg_lib_size_reduce << "%\t"
+					    << avg_compile_time_speedup << "%" << std::endl;
 
-			if (test_cases[case_id] == "perf_float64_sin")
-			{
-				// trigonometricParams cannot have extention
-				break;
+				if (test_cases[case_id] == "perf_float64_sin")
+				{
+					// trigonometricParams cannot have extention
+					break;
+				}
 			}
+
+			//		ofs.close();
+			//
+			//		return 0;
 		}
-
-//		ofs.close();
-//
-//		return 0;
 	}
-	ofs.close();
 
+	ofs.close();
 	return 0;
 }
+
 

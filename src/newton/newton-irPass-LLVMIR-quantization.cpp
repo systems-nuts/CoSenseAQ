@@ -3,6 +3,7 @@
 #include "llvm/IR/Constant.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/GlobalVariable.h"
+#include <llvm/IR/Attributes.h>
 #include <vector>
 #include <cmath>
 #include "newton-irPass-LLVMIR-quantization.h"
@@ -18,6 +19,9 @@ unsigned int FRAC_Q;
 
 #define FRAC_BASE (1 << FRAC_Q)
 
+inline bool isNewtonInternal(const llvm::Function &F) {
+    return F.hasFnAttribute("newton.internal");
+}
 
 llvm::Value *
 performFixedPointMul(llvm::IRBuilder<> & Builder, llvm::Value * lhs, llvm::Value * rhs, unsigned int FRAC_Q)
@@ -155,9 +159,13 @@ createFixRsqrt(llvm::Module * irModule, llvm::Type * quantizedType, std::vector<
 		}
 	}
 
+
+
 	// Define the function type: int16_t/int32_t fixrsqrt(int16_t/int32_t x)
 	llvm::FunctionType * funcType = llvm::FunctionType::get(quantizedType, {quantizedType}, false);
 	llvm::Function *     func     = llvm::Function::Create(funcType, llvm::Function::PrivateLinkage, fixrsqrtFuncName, irModule);
+
+	func->addFnAttr("newton.internal");
 
 	llvm::BasicBlock * entryBB = llvm::BasicBlock::Create(irModule->getContext(), "", func);
 	llvm::IRBuilder<>  builder(entryBB);
@@ -1871,6 +1879,7 @@ performFixedPointSqrt(IRBuilder<> & builder, Module * irModule, Value * fixedPoi
 void
 handleSqrtCall(CallInst * llvmIrCallInstruction, Type * quantizedType)
 {
+
 	IRBuilder<> Builder(llvmIrCallInstruction);
 	auto	    operand = llvmIrCallInstruction->getOperand(0);
 
@@ -2061,7 +2070,7 @@ void handleGetElementPtr(GetElementPtrInst *gepInst, Type *quantizedType) {
 void
 quantizeFunctionArguments(llvm::Function & func, llvm::IRBuilder<> & builder)
 {
-	// Skip the function if it is MadgwickAHRSupdateIMU
+
 	if (isTargetFunction(func))
 	{
 		llvm::errs() << "Skipping quantization for: " << func.getName() << "\n";
@@ -2155,8 +2164,8 @@ shouldSkipFunction(const std::string & functionName)
 	    "fixsqrt",
 	    "fixrsqrt",
 	    "fixmul",
-	    "llvm.sqrt.f64",
-	    "llvm.sqrt.f32",
+	    //"llvm.sqrt.f64",
+	    //"llvm.sqrt.f32",
 	    "sqrt",
 	    "sqrtf"};
 
@@ -2266,7 +2275,7 @@ irPassLLVMIRAutoQuantization(State *N, llvm::Function &llvmIrFunction, std::vect
 
 		// Usage in the original function
 		std::string functionName = llvmIrFunction.getName().str();
-		if (shouldSkipFunction(functionName))
+		if (shouldSkipFunction(functionName) || isNewtonInternal(llvmIrFunction))
 		{
 			return;
 		}
@@ -2329,7 +2338,14 @@ irPassLLVMIRAutoQuantization(State *N, llvm::Function &llvmIrFunction, std::vect
 		 * generate hardcode function
 		 * */
 		//llvm::Function * fixsqrt  = createFixSqrt(module, quantizedType, functionsToInsert);
-		llvm::Function * fixrsqrt = createFixRsqrt(module, quantizedType, functionsToInsert);
+		//llvm::Function * fixrsqrt = createFixRsqrt(module, quantizedType, functionsToInsert);
+		llvm::errs() << "Start Creating fixsqrt function\n";
+		static llvm::Function * fixrsqrt = nullptr;
+		 if (!fixrsqrt) {
+			fixrsqrt = createFixRsqrt(module, quantizedType, functionsToInsert);
+			fixrsqrt->addFnAttr("newton.internal");
+		}
+		llvm::errs() << "finish Creating fixsqrt function\n";
 		//		functionsToErase.push_back(fixrsqrt);
 
 		for (BasicBlock & llvmIrBasicBlock : llvmIrFunction)
