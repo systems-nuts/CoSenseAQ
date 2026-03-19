@@ -811,17 +811,6 @@ main(int argc, char ** argv)
 			avg_speedup << test_cases[case_id] << "\t" << avg_inst_speedup << "%\t"
 				    << avg_time_speedup << "%\t" << avg_ir_reduce << "%\t" << avg_lib_size_reduce << "%\t"
 				    << avg_compile_time_speedup << "%" << std::endl;
-
-				if (test_cases[case_id] == "perf_float64_sin")
-				{
-					// trigonometricParams cannot have extention
-					break;
-				}
-			}
-
-			//		ofs.close();
-			//
-			//		return 0;
 		}
 	}
 
